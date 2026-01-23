@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista Studentów</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header>
+    <div class="logo"><a href="/index">Dziennik</a></div>
+    <nav>
+        <ul>
+            <li><a href="/studentList">Student</a></li>
+            <li><a href="/zadanieList">Zadanie</a></li>
+            <li><a href="/projektList">Projekt</a></li>
+            <li><a href="/logout" class="btn-light">Wyloguj</a></li>
+        </ul>
+    </nav>
+</header>
+
+<section>
+    <h1>Lista Studentów</h1>
+
+    <div class="project-actions" style="display: flex; justify-content: flex-end;">
+        <form action="/studentList" method="get" style="display:flex; gap:10px;">
+            <input type="text" name="keyword" placeholder="Szukaj (Indeks, Email, Nazwisko)..."
+                   style="padding: 10px; border-radius: 8px; border: 1px solid #ccc; width: 300px;">
+            <button type="submit" class="btn-green">Szukaj</button>
+            <a href="/studentList" class="btn-light">Reset</a>
+        </form>
+    </div>
+
+    <table class="comparison-table">
+        <thead>
+        <tr>
+            <th>Indeks</th>
+            <th>Imię i Nazwisko</th>
+            <th>Email</th>
+            <th>Tryb studiów</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="student : ${studenci}">
+            <td th:text="${student.nrIndeksu}" style="font-weight:bold;">12345</td>
+            <td th:text="${student.imie + ' ' + student.nazwisko}">Jan Kowalski</td>
+            <td th:text="${student.email}">email@test.pl</td>
+            <td>
+                <span th:text="${student.stacjonarny ? 'Stacjonarne' : 'Niestacjonarne'}"
+                      style="background: #e8f5e9; color: #2e7d32; padding: 5px 10px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                </span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rejestracja studenta</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header>
+    <div class="logo"><a th:href="@{/index}">Dziennik</a></div>
+    <nav>
+        <ul>
+            <li><a th:href="@{/index}">Logowanie</a></li>
+        </ul>
+    </nav>
+</header>
+
+<section>
+    <h1>Rejestracja studenta</h1>
+
+    <div class="form-container">
+        <form id="registerForm" th:action="@{/register}" th:object="${student}" method="POST">
+
+            <label>Imię:</label>
+            <input type="text" th:field="*{imie}" placeholder="Jan" required>
+
+            <label>Nazwisko:</label>
+            <input type="text" th:field="*{nazwisko}" placeholder="Kowalski" required>
+
+            <label>Numer indeksu:</label>
+            <input type="text" th:field="*{nrIndeksu}" placeholder="12345" required>
+
+            <label>Forma studiów:</label>
+            <select th:field="*{stacjonarny}" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 15px;">
+                <option th:value="true">Stacjonarne</option>
+                <option th:value="false">Niestacjonarne</option>
+            </select>
+
+            <label>E-mail (Twój login):</label>
+            <input type="email" th:field="*{email}" placeholder="student@pbs.edu.pl" required>
+
+            <label>Hasło:</label>
+            <input type="password" th:field="*{password}" placeholder="******" required>
+
+            <button type="submit" class="btn-green" style="width: 100%; margin-top: 10px;">Zarejestruj się</button>
+            <a th:href="@{/index}" class="btn-light" style="display:block; text-align:center; margin-top:10px;">Anuluj</a>
+        </form>
+    </div>
+</section>
+
+
+<script th:src="@{/js/script.js}"></script>
+</body>
+</html>

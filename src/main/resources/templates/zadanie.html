@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista Zadań</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header>
+    <div class="logo"><a href="/index">Dziennik</a></div>
+    <nav>
+        <ul>
+            <li><a href="/studentList">Student</a></li>
+            <li><a href="/zadanieList">Zadanie</a></li>
+            <li><a href="/projektList">Projekt</a></li>
+            <li><a href="/logout" class="btn-light">Wyloguj</a></li>
+        </ul>
+    </nav>
+</header>
+
+<section>
+    <h1>Lista Zadań</h1>
+    <div class="project-actions">
+        <a href="/zadanieEdit" class="btn-green">Dodaj zadanie</a>
+    </div>
+
+    <table class="comparison-table">
+        <thead>
+        <tr>
+            <th>Nazwa</th>
+            <th>Opis</th>
+            <th>Kolejność</th>
+            <th>Przypisani Studenci</th> <th>Akcje</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="zadanie : ${zadania}">
+            <td th:text="${zadanie.nazwa}" style="font-weight:bold;">Nazwa</td>
+            <td th:text="${zadanie.opis}">Opis</td>
+            <td th:text="${zadanie.kolejnosc}">1</td>
+
+            <td>
+                <div th:if="${zadanie.studentIds.isEmpty()}">
+                    <span style="color: #999;">Brak przypisania</span>
+                </div>
+                <div th:each="id : ${zadanie.studentIds}" style="margin-bottom: 4px;">
+                    <span th:if="${studentService.getStudentById(id).isPresent()}"
+                          th:text="'👤 ' + ${studentService.getStudentById(id).get().imie} + ' ' + ${studentService.getStudentById(id).get().nazwisko} + ' (' + ${studentService.getStudentById(id).get().nrIndeksu} + ')'"
+                          style="display:inline-block; background:#f0f0f0; padding:2px 8px; border-radius:4px; font-size:13px;">
+                    </span>
+                </div>
+            </td>
+
+            <td>
+                <a th:href="@{/zadanieEdit(zadanieId=${zadanie.zadanieId})}" class="btn-green">Edytuj</a>
+                <a th:href="@{/zadanieDelete(zadanieId=${zadanie.zadanieId})}" style="color: red; margin-left: 10px;">Usuń</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+</body>
+</html>

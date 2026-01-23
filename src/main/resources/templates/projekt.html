@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projekt - Dziennik</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header>
+    <div class="logo"><a th:href="@{/index}">Dziennik</a></div>
+    <nav>
+        <ul>
+            <li><a th:href="@{/studentList}">Student</a></li>
+            <li><a th:href="@{/zadanieList}">Zadanie</a></li>
+            <li><a th:href="@{/projektList}">Projekt</a></li>
+            <li><a href="#">Contact Us</a></li>
+            <li><a href="/logout" class="btn-light">Wyloguj</a></li>
+        </ul>
+    </nav>
+    <a href="#" class="btn-green">Learn More</a>
+</header>
+<section>
+    <h1>Lista projektów</h1>
+    <div class="project-actions">
+        <a th:href="@{/projektEdit}" class="btn-green">Dodaj projekt</a>
+    </div>
+    <table class="comparison-table" id="projectTable">
+        <thead>
+        <tr>
+            <th>Id</th>
+            <th>Nazwa</th>
+            <th>Opis</th>
+            <th>Utworzony</th>
+            <th>Data oddania</th>
+            <th>Edytuj</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="projekt : ${projekty}">
+            <td th:text="${projekt.projektId}">Id</td>
+            <td th:text="${projekt.nazwa}">Nazwa</td>
+            <td th:text="${projekt.opis}">Opis</td>
+            <td th:text="${#temporals.format(projekt.dataCzasUtworzenia, 'yyyy-MM-dd HH:mm')}">Utworzony</td>
+            <td th:text="${projekt.dataOddania}">Data oddania</td>
+            <td>
+                <a th:href="@{/projektEdit(projektId=${projekt.projektId})}" class="btn-green">Edytuj</a>
+                <a th:href="@{/projektEdit(projektId=${projekt.projektId}, delete='true')}"
+                   style="color: red; margin-left: 10px;">Usuń</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+
+<script th:src="@{/js/script.js}"></script>
+</body>
+</html>

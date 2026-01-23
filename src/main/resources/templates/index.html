@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logowanie - Dziennik</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header>
+    <div class="logo"><a th:href="@{/index}">Dziennik</a></div>
+    <nav>
+        <ul>
+            <li><a th:href="@{/register.html}" class="btn-light">Rejestracja</a></li>
+        </ul>
+    </nav>
+</header>
+
+<section style="display: flex; justify-content: center; align-items: center; min-height: 80vh;">
+
+    <div class="form-container" style="width: 100%; max-width: 400px;">
+        <h1 style="text-align: center; margin-bottom: 30px;">Logowanie</h1>
+
+        <form action="/login" method="post">
+
+            <label for="username" style="font-weight: bold; margin-bottom: 5px; display:block;">E-mail (Login):</label>
+            <input type="text" id="username" name="username" placeholder="admin" required
+                   style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px;">
+
+            <label for="password" style="font-weight: bold; margin-bottom: 5px; display:block;">Hasło:</label>
+            <input type="password" id="password" name="password" placeholder="••••••" required
+                   style="width: 100%; padding: 10px; margin-bottom: 25px; border: 1px solid #ccc; border-radius: 5px;">
+
+            <button type="submit" class="btn-green" style="width: 100%; font-size: 16px;">Zaloguj się</button>
+
+            <div style="text-align: center; margin-top: 15px;">
+                <span style="color: #666;">Nie masz konta?</span>
+                <a th:href="@{/register.html}" style="color: #4CAF50; font-weight: bold; text-decoration: none;">Zarejestruj się</a>
+            </div>
+
+            <div th:if="${param.error}" style="color: red; text-align: center; margin-top: 10px; font-size: 14px;">
+                Błędny login lub hasło!
+            </div>
+            <div th:if="${param.logout}" style="color: green; text-align: center; margin-top: 10px; font-size: 14px;">
+                Wylogowano pomyślnie.
+            </div>
+        </form>
+    </div>
+</section>
+
+
+<script th:src="@{/js/script.js}"></script>
+</body>
+</html>

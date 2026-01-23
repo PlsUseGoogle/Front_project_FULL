@@ -1,0 +1,379 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: Arial, sans-serif;
+    color: #333;
+    background: #fff;
+    min-height: 100vh;
+    position: relative;
+}
+
+/* Жидкое стекло */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: url('../src/main/resources/static/images/glass-texture.jpg') center/cover no-repeat;
+    opacity: 0.5;
+    z-index: -2;
+    animation: move 100s linear infinite;
+}
+
+body::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    z-index: -1;
+}
+
+@keyframes move {
+    0% { background-position: 0 0; }
+    100% { background-position: 100% 100%; }
+}
+
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 30px 60px;
+    background: rgba(255,255,255,0.3);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255,255,255,0.4);
+    z-index: 1000;
+}
+
+.logo a {
+    font-size: 28px;
+    font-weight: bold;
+    color: #000;
+    text-decoration: none;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    gap: 40px;
+}
+
+nav ul li a {
+    text-decoration: none;
+    color: #000;
+    font-size: 16px;
+}
+
+.btn-green {
+    background: #556B2F;
+    color: white;
+    padding: 12px 30px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.btn-light {
+    background: #E8F5E9;
+    color: #556B2F;
+    padding: 12px 30px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+section {
+    padding: 140px 60px 80px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+h1 {
+    font-size: 64px;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.subtitle {
+    text-align: center;
+    color: #666;
+    font-size: 18px;
+    max-width: 800px;
+    margin: 0 auto 60px;
+}
+
+.features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    margin: 60px 0;
+}
+
+.feature {
+    background: #f9f9f9;
+    padding: 30px;
+    border-radius: 20px;
+}
+
+.landscape {
+    width: 100%;
+    border-radius: 20px;
+    margin: 80px 0;
+}
+
+.big-picture {
+    display: flex;
+    gap: 80px;
+    align-items: center;
+    margin: 100px 0;
+}
+
+.big-picture h2 {
+    font-size: 48px;
+}
+
+.big-picture ol {
+    list-style: none;
+    counter-reset: item;
+}
+
+.big-picture ol li {
+    counter-increment: item;
+    padding-left: 40px;
+    position: relative;
+    margin-bottom: 20px;
+    color: #666;
+}
+
+.big-picture ol li::before {
+    content: "0" counter(item);
+    position: absolute;
+    left: 0;
+    color: #ccc;
+    font-weight: bold;
+}
+
+.big-picture-img {
+    background: #F5F5DC;
+    padding: 40px;
+    border-radius: 20px;
+}
+
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 60px 0;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.comparison-table th, td {
+    padding: 20px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.comparison-table th {
+    background: #f9f9f9;
+}
+
+.testimonial {
+    display: flex;
+    gap: 60px;
+    align-items: center;
+    margin: 100px 0;
+}
+
+.testimonial-img {
+    background: #F5F5DC;
+    padding: 40px;
+    border-radius: 20px;
+    flex: 1;
+}
+
+.projekt-steps {
+    display: flex;
+    gap: 40px;
+    margin: 80px 0;
+}
+
+.projekt-step {
+    flex: 1;
+    text-align: center;
+}
+
+.projekt-step h2 {
+    font-size: 120px;
+    color: #f0f0f0;
+}
+
+.connect {
+    text-align: center;
+    margin: 100px 0;
+}
+
+footer {
+    padding: 40px 60px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    color: #666;
+    font-size: 14px;
+}
+
+.form-container {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 30px;
+    background: #f9f9f9;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+.form-container label {
+    display: block;
+    margin: 15px 0 5px;
+    font-weight: bold;
+}
+
+.form-container input, .form-container textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.project-actions {
+    margin: 20px 0;
+    text-align: right;
+}
+
+/* Responsive дизайн — адаптация под мобильные устройства */
+@media (max-width: 1024px) {
+    header {
+        flex-direction: column;
+        padding: 20px;
+        text-align: center;
+    }
+
+    nav ul {
+        margin-top: 20px;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+    }
+
+    .btn-green {
+        margin-top: 10px;
+    }
+
+    section {
+        padding: 100px 30px 60px;
+    }
+
+    h1 {
+        font-size: 48px;
+    }
+
+    .features {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .big-picture, .testimonial, .projekt-steps {
+        flex-direction: column;
+    }
+
+    .big-picture-img, .testimonial-img {
+        margin-top: 40px;
+    }
+
+    .form-container {
+        padding: 20px;
+    }
+
+    .form-container input, .form-container textarea {
+        font-size: 16px; /* Чтобы не зуммило на iOS */
+    }
+}
+
+@media (max-width: 768px) {
+    h1 {
+        font-size: 40px;
+    }
+
+    h2 {
+        font-size: 36px;
+    }
+
+    .features {
+        grid-template-columns: 1fr;
+    }
+
+    .projekt-step h2 {
+        font-size: 80px;
+    }
+
+    .comparison-table th, .comparison-table td {
+        padding: 12px 8px;
+        font-size: 14px;
+    }
+
+    .comparison-table {
+        font-size: 14px;
+    }
+
+    /* Скрываем некоторые колонки в таблице на мобильных */
+    .comparison-table thead th:nth-child(4),
+    .comparison-table thead th:nth-child(5),
+    .comparison-table tbody td:nth-child(4),
+    .comparison-table tbody td:nth-child(5) {
+        display: none;
+    }
+
+    /* Стек кнопок в формах */
+    .form-container button, .form-container a.btn-light {
+        width: 100%;
+        margin: 10px 0;
+    }
+}
+
+@media (max-width: 480px) {
+    header {
+        padding: 15px;
+    }
+
+    .logo a {
+        font-size: 24px;
+    }
+
+    nav ul {
+        gap: 10px;
+        font-size: 14px;
+    }
+
+    h1 {
+        font-size: 32px;
+    }
+
+    section {
+        padding: 80px 20px 50px;
+    }
+
+    .landscape {
+        border-radius: 15px;
+    }
+
+    .btn-green, .btn-light {
+        padding: 14px 20px;
+        font-size: 16px;
+    }
+
+    .form-container {
+        padding: 15px;
+    }
+}
