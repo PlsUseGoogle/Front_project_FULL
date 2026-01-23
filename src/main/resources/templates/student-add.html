@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Dodaj Studenta</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header>
+    <div class="logo"><a href="/index">Dziennik</a></div>
+    <nav>
+        <ul>
+            <li><a href="/studentList">Student</a></li>
+            <li><a href="/zadanieList">Zadanie</a></li>
+            <li><a href="/projektList">Projekt</a></li>
+        </ul>
+    </nav>
+</header>
+
+<section>
+    <h1>Dodaj nowego studenta</h1>
+
+    <div class="form-container">
+        <form th:action="@{/studentSave}" th:object="${student}" method="post">
+
+            <label>Imię:</label>
+            <input type="text" th:field="*{imie}" placeholder="Jan" required>
+
+            <label>Nazwisko:</label>
+            <input type="text" th:field="*{nazwisko}" placeholder="Kowalski" required>
+
+            <label>Numer indeksu:</label>
+            <input type="text" th:field="*{nrIndeksu}" placeholder="12345" required>
+
+            <label>E-mail:</label>
+            <input type="email" th:field="*{email}" placeholder="student@pbs.edu.pl" required>
+
+            <label>Forma studiów:</label>
+            <select th:field="*{stacjonarny}" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 15px;">
+                <option th:value="true">Stacjonarne</option>
+                <option th:value="false">Niestacjonarne</option>
+            </select>
+
+            <label>Hasło (Opcjonalne, domyślnie 123):</label>
+            <input type="text" th:field="*{password}" placeholder="Pozostaw puste dla domyślnego">
+
+            <button type="submit" class="btn-green">Zapisz</button>
+            <a href="/studentList" class="btn-light">Anuluj</a>
+        </form>
+    </div>
+</section>
+</body>
+</html>

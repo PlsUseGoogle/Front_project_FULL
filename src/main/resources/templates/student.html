@@ -21,9 +21,12 @@
 <section>
     <h1>Lista Studentów</h1>
 
-    <div class="project-actions" style="display: flex; justify-content: flex-end;">
+    <div class="project-actions" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+
+        <a href="/studentAdd" class="btn-green">Dodaj studenta</a>
+
         <form action="/studentList" method="get" style="display:flex; gap:10px;">
-            <input type="text" name="keyword" placeholder="Szukaj (Indeks, Email, Nazwisko)..."
+            <input type="text" name="keyword" placeholder="Szukaj (Indeks, Email)..."
                    style="padding: 10px; border-radius: 8px; border: 1px solid #ccc; width: 300px;">
             <button type="submit" class="btn-green">Szukaj</button>
             <a href="/studentList" class="btn-light">Reset</a>

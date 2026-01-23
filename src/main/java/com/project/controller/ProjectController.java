@@ -121,4 +121,18 @@ public class ProjectController {
         zadanieService.deleteZadanie(zadanieId);
         return "redirect:/zadanieList";
     }
+
+    // --- ДОБАВЛЕНИЕ СТУДЕНТА (АДМИН) ---
+
+    @GetMapping("/studentAdd")
+    public String addStudentPage(Model model) {
+        model.addAttribute("student", new Student()); // Пустой объект для формы
+        return "student-add"; // Имя нового HTML файла
+    }
+
+    @PostMapping("/studentSave")
+    public String saveStudentFromForm(Student student) {
+        studentService.saveStudent(student);
+        return "redirect:/studentList";
+    }
 }

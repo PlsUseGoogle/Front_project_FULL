@@ -39,4 +39,17 @@ public class StudentService {
     public Optional<Student> getStudentById(Integer id) {
         return students.stream().filter(s -> s.getStudentId().equals(id)).findFirst();
     }
+
+    // Метод для сохранения нового студента
+    public void saveStudent(Student student) {
+        // Если ID нет, генерируем новый
+        if (student.getStudentId() == null) {
+            student.setStudentId(students.size() + 1);
+        }
+        // Если пароль не указали (например, добавил админ), ставим "123" по умолчанию
+        if (student.getPassword() == null || student.getPassword().isEmpty()) {
+            student.setPassword("123");
+        }
+        students.add(student);
+    }
 }
