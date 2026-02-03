@@ -21,7 +21,6 @@ public class ProjectController {
     private final ProjektService projektService;
     private final StudentService studentService;
     private final ZadanieService zadanieService;
-    // !!! Добавили Менеджера пользователей
     private final InMemoryUserDetailsManager userDetailsManager;
 
     public ProjectController(ProjektService projektService,
@@ -34,36 +33,33 @@ public class ProjectController {
         this.userDetailsManager = userDetailsManager;
     }
 
-    // --- ЛОГИН / ГЛАВНАЯ ---
+    // --- LOGOWANIE / GŁÓWNA ---
     @GetMapping("/")
     public String home() { return "index"; }
 
     @GetMapping({"/index", "/index.html"})
     public String index() { return "index"; }
 
-    // --- РЕГИСТРАЦИЯ (НОВЫЙ МЕТОД) ---
+    // --- REJESTRACJA ---
     @PostMapping("/register")
     public String registerUser(Student student) {
-        // Создаем пользователя в системе безопасности
-        // Берем email как логин, и password как пароль
         userDetailsManager.createUser(
                 User.withDefaultPasswordEncoder()
-                        .username(student.getEmail()) // Логином будет Email
-                        .password(student.getPassword()) // Паролем то, что ввели
+                        .username(student.getEmail())
+                        .password(student.getPassword())
                         .roles("USER")
                         .build()
         );
-        // После регистрации перекидываем на логин (index)
         return "redirect:/index";
     }
 
     @GetMapping("/register.html")
     public String registerPage(Model model) {
-        model.addAttribute("student", new Student()); // Пустой объект для формы
+        model.addAttribute("student", new Student());
         return "register";
     }
 
-    // --- ПРОЕКТЫ ---
+    // --- PROJEKTY ---
     @GetMapping("/projektList")
     public String listProjekty(Model model, Pageable pageable) {
         model.addAttribute("projekty", projektService.getProjekty(pageable).getContent());
@@ -73,15 +69,32 @@ public class ProjectController {
     @GetMapping("/projekt.html")
     public String projektRedirect() { return "redirect:/projektList"; }
 
+    // formularz edycji / dodawania projektu (GET)
     @GetMapping("/projektEdit")
-    public String editProjekt(@RequestParam(required = false) Integer projektId, Model model) {
-        model.addAttribute("projekt", projektId != null ? projektService.getProjekt(projektId).orElse(new Projekt()) : new Projekt());
+    public String editProjekt(@RequestParam(name = "projektId", required = false) Integer projektId,
+                              Model model) {
+        model.addAttribute(
+                "projekt",
+                projektId != null
+                        ? projektService.getProjekt(projektId).orElse(new Projekt())
+                        : new Projekt()
+        );
         return "project-edit";
     }
 
-    // --- СТУДЕНТЫ ---
+    // zapis projektu (POST z formularza)
+    @PostMapping("/projektEdit")
+    public String saveProjekt(Projekt projekt) {
+        // tutaj zapisujemy projekt (nowy lub edytowany)
+        projektService.setProjekt(projekt);
+        // po zapisaniu wracamy na listę projektów
+        return "redirect:/projektList";
+    }
+
+    // --- STUDENCI ---
     @GetMapping("/studentList")
-    public String listStudentow(@RequestParam(required = false) String keyword, Model model) {
+    public String listStudentow(@RequestParam(name = "keyword", required = false) String keyword,
+                                Model model) {
         model.addAttribute("studenci", studentService.searchStudents(keyword));
         return "student";
     }
@@ -89,7 +102,7 @@ public class ProjectController {
     @GetMapping("/student.html")
     public String studentRedirect() { return "redirect:/studentList"; }
 
-    // --- ЗАДАЧИ ---
+    // --- ZADANIA ---
     @GetMapping("/zadanieList")
     public String listZadania(Model model) {
         model.addAttribute("zadania", zadanieService.getAllZadania());
@@ -101,7 +114,8 @@ public class ProjectController {
     public String zadanieRedirect() { return "redirect:/zadanieList"; }
 
     @GetMapping("/zadanieEdit")
-    public String editZadanie(@RequestParam(required = false) Integer zadanieId, Model model) {
+    public String editZadanie(@RequestParam(name = "zadanieId", required = false) Integer zadanieId,
+                              Model model) {
         Zadanie zadanie = (zadanieId != null)
                 ? zadanieService.getZadanie(zadanieId).orElse(new Zadanie())
                 : new Zadanie();
@@ -122,12 +136,11 @@ public class ProjectController {
         return "redirect:/zadanieList";
     }
 
-    // --- ДОБАВЛЕНИЕ СТУДЕНТА (АДМИН) ---
-
+    // --- DODAWANIE STUDENTA (ADMIN) ---
     @GetMapping("/studentAdd")
     public String addStudentPage(Model model) {
-        model.addAttribute("student", new Student()); // Пустой объект для формы
-        return "student-add"; // Имя нового HTML файла
+        model.addAttribute("student", new Student());
+        return "student-add";
     }
 
     @PostMapping("/studentSave")
