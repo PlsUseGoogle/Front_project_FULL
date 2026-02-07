@@ -5,6 +5,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
 public class ServiceUtil {
@@ -49,5 +50,15 @@ public class ServiceUtil {
             }
         }
         return builder.toString();
+    }
+
+    public static UriBuilder applySort(UriBuilder builder, Sort sort) {
+        if (sort == null) {
+            return builder;
+        }
+        for (Sort.Order order : sort) {
+            builder.queryParam("sort", order.getProperty() + "," + order.getDirection());
+        }
+        return builder;
     }
 }

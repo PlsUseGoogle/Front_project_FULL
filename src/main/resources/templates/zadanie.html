@@ -30,7 +30,7 @@
             <th>Nazwa</th>
             <th>Opis</th>
             <th>Kolejność</th>
-            <th>Przypisani Studenci</th> <th>Akcje</th>
+            <th>Projekt</th> <th>Akcje</th>
         </tr>
         </thead>
         <tbody>
@@ -40,15 +40,11 @@
             <td th:text="${zadanie.kolejnosc}">1</td>
 
             <td>
-                <div th:if="${zadanie.studentIds.isEmpty()}">
-                    <span style="color: #999;">Brak przypisania</span>
-                </div>
-                <div th:each="id : ${zadanie.studentIds}" style="margin-bottom: 4px;">
-                    <span th:if="${studentService.getStudentById(id).isPresent()}"
-                          th:text="'👤 ' + ${studentService.getStudentById(id).get().imie} + ' ' + ${studentService.getStudentById(id).get().nazwisko} + ' (' + ${studentService.getStudentById(id).get().nrIndeksu} + ')'"
-                          style="display:inline-block; background:#f0f0f0; padding:2px 8px; border-radius:4px; font-size:13px;">
-                    </span>
-                </div>
+                <span th:if="${zadanie.projekt != null}"
+                      th:text="${zadanie.projekt.nazwa != null ? zadanie.projekt.nazwa : 'ID: ' + zadanie.projekt.projektId}"
+                      style="display:inline-block; background:#f0f0f0; padding:2px 8px; border-radius:4px; font-size:13px;">
+                </span>
+                <span th:if="${zadanie.projekt == null}" style="color: #999;">Brak projektu</span>
             </td>
 
             <td>

@@ -1,55 +1,157 @@
 package com.project.service;
 
 import com.project.model.Student;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
+import org.springframework.web.client.RestClient;
+
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class StudentService {
-    private List<Student> students = new ArrayList<>();
+    private static final String RESOURCE_PATH = "/studenci";
 
-    public StudentService() {
-        // !!! ИСПРАВЛЕНИЕ: Добавил пароль "123" в конце каждой строки !!!
-        students.add(new Student(1, "Jan", "Kowalski", "12345", "jan@pbs.edu.pl", true, "123"));
-        students.add(new Student(2, "Anna", "Nowak", "54321", "anna@pbs.edu.pl", false, "123"));
-        students.add(new Student(3, "Piotr", "Wiśniewski", "99900", "piotr@pbs.edu.pl", true, "123"));
+    private final ApiRestClientProvider restClientProvider;
+
+    public StudentService(ApiRestClientProvider restClientProvider) {
+        this.restClientProvider = restClientProvider;
     }
 
     public List<Student> getAllStudents() {
-        return students;
+        RestClient restClient = restClientProvider.clientForCurrentUser();
+        RestResponsePage<Student> page = restClient.get()
+                .uri(uriBuilder -> uriBuilder.path(RESOURCE_PATH)
+                        .queryParam("page", 0)
+                        .queryParam("size", 1000)
+                        .build())
+                .retrieve()
+                .body(new ParameterizedTypeReference<>() {});
+        return page != null ? page.getContent() : List.of();
     }
 
-    // Поиск по всем полям
     public List<Student> searchStudents(String keyword) {
-        if (keyword == null || keyword.isEmpty()) return students;
+        if (keyword == null || keyword.isBlank()) {
+            return getAllStudents();
+        }
 
-        String lowerKw = keyword.toLowerCase();
+        RestClient restClient = restClientProvider.clientForCurrentUser();
+        if (keyword.matches("^[0-9]+$")) {
+            Student student = restClient.get()
+                    .uri(RESOURCE_PATH + "/nrIndeksu/{nrIndeksu}", keyword)
+                    .retrieve()
+                    .body(Student.class);
+            return student != null ? List.of(student) : List.of();
+        }
 
-        return students.stream()
-                .filter(s -> s.getNazwisko().toLowerCase().contains(lowerKw) ||
-                        s.getImie().toLowerCase().contains(lowerKw) ||
-                        s.getNrIndeksu().contains(keyword) ||
-                        s.getEmail().toLowerCase().contains(lowerKw))
-                .collect(Collectors.toList());
+        String param = keyword.contains("@") ? "email" : null;
+        if (param != null) {
+            return searchByParam(param, keyword);
+        }
+
+        List<Student> byNazwisko = searchByParam("nazwisko", keyword);
+        List<Student> byImie = searchByParam("imie", keyword);
+
+        if (byNazwisko.isEmpty() && byImie.isEmpty()) {
+            return List.of();
+        }
+
+        return java.util.stream.Stream.concat(byNazwisko.stream(), byImie.stream())
+                .collect(java.util.stream.Collectors.collectingAndThen(
+                        java.util.stream.Collectors.toMap(Student::getStudentId, s -> s, (a, b) -> a),
+                        map -> map.values().stream().toList()
+                ));
+    }
+
+    private List<Student> searchByParam(String paramName, String value) {
+        RestClient restClient = restClientProvider.clientForCurrentUser();
+        RestResponsePage<Student> page = restClient.get()
+                .uri(uriBuilder -> uriBuilder.path(RESOURCE_PATH)
+                        .queryParam(paramName, value)
+                        .queryParam("page", 0)
+                        .queryParam("size", 1000)
+                        .build())
+                .retrieve()
+                .body(new ParameterizedTypeReference<>() {});
+        return page != null ? page.getContent() : List.of();
     }
 
     public Optional<Student> getStudentById(Integer id) {
-        return students.stream().filter(s -> s.getStudentId().equals(id)).findFirst();
+        RestClient restClient = restClientProvider.clientForCurrentUser();
+        Student student = restClient.get()
+                .uri(RESOURCE_PATH + "/{studentId}", id)
+                .retrieve()
+                .body(Student.class);
+        return Optional.ofNullable(student);
     }
 
-    // Метод для сохранения нового студента
     public void saveStudent(Student student) {
-        // Если ID нет, генерируем новый
+        RestClient restClient = restClientProvider.clientForCurrentUser();
+        StudentRequest payload = StudentRequest.fromStudent(student);
         if (student.getStudentId() == null) {
-            student.setStudentId(students.size() + 1);
+            restClient.post()
+                    .uri(RESOURCE_PATH)
+                    .body(payload)
+                    .retrieve()
+                    .toBodilessEntity();
+        } else {
+            restClient.put()
+                    .uri(RESOURCE_PATH + "/{studentId}", student.getStudentId())
+                    .body(payload)
+                    .retrieve()
+                    .toBodilessEntity();
         }
-        // Если пароль не указали (например, добавил админ), ставим "123" по умолчанию
-        if (student.getPassword() == null || student.getPassword().isEmpty()) {
-            student.setPassword("123");
+    }
+
+    public void deleteStudent(Integer studentId) {
+        RestClient restClient = restClientProvider.clientForCurrentUser();
+        restClient.delete()
+                .uri(RESOURCE_PATH + "/{studentId}", studentId)
+                .retrieve()
+                .toBodilessEntity();
+    }
+
+    private static class StudentRequest {
+        private final String imie;
+        private final String nazwisko;
+        private final String nrIndeksu;
+        private final String email;
+        private final boolean stacjonarny;
+        private final String password;
+        private final List<ProjektRef> projekty;
+
+        private StudentRequest(String imie, String nazwisko, String nrIndeksu,
+                               String email, boolean stacjonarny, String password, List<ProjektRef> projekty) {
+            this.imie = imie;
+            this.nazwisko = nazwisko;
+            this.nrIndeksu = nrIndeksu;
+            this.email = email;
+            this.stacjonarny = stacjonarny;
+            this.password = password;
+            this.projekty = projekty;
         }
-        students.add(student);
+
+        static StudentRequest fromStudent(Student student) {
+            List<ProjektRef> projekty = student.getProjektIds().stream()
+                    .map(ProjektRef::new)
+                    .toList();
+            return new StudentRequest(
+                    student.getImie(),
+                    student.getNazwisko(),
+                    student.getNrIndeksu(),
+                    student.getEmail(),
+                    student.isStacjonarny(),
+                    student.getPassword(),
+                    projekty
+            );
+        }
+    }
+
+    private static class ProjektRef {
+        private final Integer projektId;
+
+        private ProjektRef(Integer projektId) {
+            this.projektId = projektId;
+        }
     }
 }

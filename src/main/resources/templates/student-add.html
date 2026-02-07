@@ -41,6 +41,15 @@
                 <option th:value="false">Niestacjonarne</option>
             </select>
 
+            <label>Przypisz projekty (opcjonalnie):</label>
+            <select th:field="*{projektIds}" multiple="multiple"
+                    style="width: 100%; height: 150px; padding: 10px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 15px; background-color: white;">
+                <option th:each="projekt : ${listaProjektow}"
+                        th:value="${projekt.projektId}"
+                        th:text="${projekt.nazwa}">
+                </option>
+            </select>
+
             <label>Hasło (Opcjonalne, domyślnie 123):</label>
             <input type="text" th:field="*{password}" placeholder="Pozostaw puste dla domyślnego">
 

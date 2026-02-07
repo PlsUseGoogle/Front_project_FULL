@@ -1,10 +1,14 @@
 package com.project.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Student {
     private Integer studentId;
     private String imie;
@@ -13,6 +17,7 @@ public class Student {
     private String email;
     private boolean stacjonarny;
     private String password;
+    private List<Integer> projektIds = new ArrayList<>();
 
     // --- МЫ ПИШЕМ ЭТОТ КОД ВРУЧНУЮ, ЧТОБЫ ОШИБКА ИСЧЕЗЛА ---
     public Student(Integer studentId, String imie, String nazwisko, String nrIndeksu, String email, boolean stacjonarny, String password) {
@@ -23,5 +28,6 @@ public class Student {
         this.email = email;
         this.stacjonarny = stacjonarny;
         this.password = password;
+        this.projektIds = new ArrayList<>();
     }
 }

@@ -2,45 +2,100 @@ package com.project.service;
 
 import com.project.model.Zadanie;
 import org.springframework.stereotype.Service;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List; // Важно
-import java.util.Arrays; // Важно
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.web.client.RestClient;
+
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class ZadanieService {
-    private List<Zadanie> zadania = new ArrayList<>();
+    private static final String RESOURCE_PATH = "/zadania";
 
-    public ZadanieService() {
-        // Тестовая задача: назначаем сразу двум студентам (ID 1 и ID 2)
-        List<Integer> ids = new ArrayList<>(Arrays.asList(1, 2));
-        zadania.add(new Zadanie(1, "Zrobić Frontend", 1, "HTML i CSS", ids, LocalDateTime.now()));
+    private final ApiRestClientProvider restClientProvider;
+
+    public ZadanieService(ApiRestClientProvider restClientProvider) {
+        this.restClientProvider = restClientProvider;
     }
 
-    public List<Zadanie> getAllZadania() { return zadania; }
+    public List<Zadanie> getAllZadania() {
+        RestClient restClient = restClientProvider.clientForCurrentUser();
+        RestResponsePage<Zadanie> page = restClient.get()
+                .uri(uriBuilder -> uriBuilder.path(RESOURCE_PATH)
+                        .queryParam("page", 0)
+                        .queryParam("size", 1000)
+                        .build())
+                .retrieve()
+                .body(new ParameterizedTypeReference<>() {});
+        return page != null ? page.getContent() : List.of();
+    }
 
     public Optional<Zadanie> getZadanie(Integer id) {
-        return zadania.stream().filter(z -> z.getZadanieId().equals(id)).findFirst();
+        RestClient restClient = restClientProvider.clientForCurrentUser();
+        Zadanie zadanie = restClient.get()
+                .uri(RESOURCE_PATH + "/{zadanieId}", id)
+                .retrieve()
+                .body(Zadanie.class);
+        return Optional.ofNullable(zadanie);
     }
 
     public void saveZadanie(Zadanie zadanie) {
-        if (zadanie.getStudentIds() == null) {
-            zadanie.setStudentIds(new ArrayList<>());
-        }
-
+        RestClient restClient = restClientProvider.clientForCurrentUser();
+        ZadanieRequest payload = ZadanieRequest.fromZadanie(zadanie);
         if (zadanie.getZadanieId() == null) {
-            zadanie.setZadanieId(zadania.size() + 1);
-            zadanie.setDataCzasDodania(LocalDateTime.now());
-            zadania.add(zadanie);
+            restClient.post()
+                    .uri(RESOURCE_PATH)
+                    .body(payload)
+                    .retrieve()
+                    .toBodilessEntity();
         } else {
-            deleteZadanie(zadanie.getZadanieId());
-            zadanie.setDataCzasDodania(LocalDateTime.now());
-            zadania.add(zadanie);
+            restClient.put()
+                    .uri(RESOURCE_PATH + "/{zadanieId}", zadanie.getZadanieId())
+                    .body(payload)
+                    .retrieve()
+                    .toBodilessEntity();
         }
     }
 
     public void deleteZadanie(Integer id) {
-        zadania.removeIf(z -> z.getZadanieId().equals(id));
+        RestClient restClient = restClientProvider.clientForCurrentUser();
+        restClient.delete()
+                .uri(RESOURCE_PATH + "/{zadanieId}", id)
+                .retrieve()
+                .toBodilessEntity();
+    }
+
+    private static class ZadanieRequest {
+        private final String nazwa;
+        private final String opis;
+        private final Integer kolejnosc;
+        private final ProjektRef projekt;
+
+        private ZadanieRequest(String nazwa, String opis, Integer kolejnosc, ProjektRef projekt) {
+            this.nazwa = nazwa;
+            this.opis = opis;
+            this.kolejnosc = kolejnosc;
+            this.projekt = projekt;
+        }
+
+        static ZadanieRequest fromZadanie(Zadanie zadanie) {
+            ProjektRef projekt = zadanie.getProjekt() != null && zadanie.getProjekt().getProjektId() != null
+                    ? new ProjektRef(zadanie.getProjekt().getProjektId())
+                    : null;
+            return new ZadanieRequest(
+                    zadanie.getNazwa(),
+                    zadanie.getOpis(),
+                    zadanie.getKolejnosc(),
+                    projekt
+            );
+        }
+    }
+
+    private static class ProjektRef {
+        private final Integer projektId;
+
+        private ProjektRef(Integer projektId) {
+            this.projektId = projektId;
+        }
     }
 }
