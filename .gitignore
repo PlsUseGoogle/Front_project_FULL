@@ -24,3 +24,7 @@ out/
 /dist/
 /nbdist/
 /.nb-gradle/
+# Gradle cache/logs
+.gradle-user/
+.gradle/
+**/build/
