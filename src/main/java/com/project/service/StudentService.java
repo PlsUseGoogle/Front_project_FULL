@@ -24,9 +24,11 @@ public class StudentService {
     public Page<Student> getAllStudents(Pageable pageable) {
         RestClient restClient = restClientProvider.clientForCurrentUser();
         RestResponsePage<Student> page = restClient.get()
-                .uri(uriBuilder -> uriBuilder.path(RESOURCE_PATH)
-                        .queryParam("page", pageable.getPageNumber())
-                        .queryParam("size", pageable.getPageSize())
+                .uri(uriBuilder -> ServiceUtil.applySort(
+                                uriBuilder.path(RESOURCE_PATH)
+                                        .queryParam("page", pageable.getPageNumber())
+                                        .queryParam("size", pageable.getPageSize()),
+                                pageable.getSort())
                         .build())
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {});
@@ -63,10 +65,12 @@ public class StudentService {
     private Page<Student> searchByParam(String paramName, String value, Pageable pageable) {
         RestClient restClient = restClientProvider.clientForCurrentUser();
         RestResponsePage<Student> page = restClient.get()
-                .uri(uriBuilder -> uriBuilder.path(RESOURCE_PATH)
-                        .queryParam(paramName, value)
-                        .queryParam("page", pageable.getPageNumber())
-                        .queryParam("size", pageable.getPageSize())
+                .uri(uriBuilder -> ServiceUtil.applySort(
+                                uriBuilder.path(RESOURCE_PATH)
+                                        .queryParam(paramName, value)
+                                        .queryParam("page", pageable.getPageNumber())
+                                        .queryParam("size", pageable.getPageSize()),
+                                pageable.getSort())
                         .build())
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {});
@@ -141,7 +145,9 @@ public class StudentService {
                                   String email, boolean stacjonarny, String password,
                                   List<ProjektRef> projekty) {
         static StudentRequest fromStudent(Student student) {
-            List<ProjektRef> projekty = student.getProjektIds().stream()
+            List<ProjektRef> projekty = (student.getProjektIds() != null ? student.getProjektIds() : List.<Integer>of()).stream()
+                    .filter(java.util.Objects::nonNull)
+                    .distinct()
                     .map(ProjektRef::new)
                     .toList();
             return new StudentRequest(

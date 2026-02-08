@@ -77,6 +77,7 @@ public class ProjectController {
         model.addAttribute("currentPage", pageProjekty.getNumber());
         model.addAttribute("totalPages", pageProjekty.getTotalPages());
         model.addAttribute("pageSize", pageProjekty.getSize());
+        setSortAttributes(model, pageable.getSort());
         return "projekt";
     }
 
@@ -105,6 +106,7 @@ public class ProjectController {
         model.addAttribute("currentPage", pageZadania.getNumber());
         model.addAttribute("totalPages", pageZadania.getTotalPages());
         model.addAttribute("pageSize", pageZadania.getSize());
+        setSortAttributes(model, pageable.getSort());
         return "projekt-view";
     }
     @PostMapping("/projektEdit")
@@ -123,6 +125,7 @@ public class ProjectController {
         model.addAttribute("currentPage", page.getNumber());
         model.addAttribute("totalPages", page.getTotalPages());
         model.addAttribute("pageSize", page.getSize());
+        setSortAttributes(model, pageable.getSort());
         return "student";
     }
 
@@ -138,6 +141,7 @@ public class ProjectController {
         model.addAttribute("currentPage", page.getNumber());
         model.addAttribute("totalPages", page.getTotalPages());
         model.addAttribute("pageSize", page.getSize());
+        setSortAttributes(model, pageable.getSort());
         return "zadanie";
     }
 
@@ -215,5 +219,20 @@ public class ProjectController {
     public String saveStudentProfile(Student student) {
         studentService.updateCurrentStudent(student);
         return "redirect:/projektList";
+    }
+
+    private void setSortAttributes(Model model, org.springframework.data.domain.Sort sort) {
+        String sortField = "";
+        String sortDir = "";
+        String sortParam = null;
+        if (sort != null && sort.isSorted()) {
+            var order = sort.iterator().next();
+            sortField = order.getProperty();
+            sortDir = order.getDirection().name().toLowerCase();
+            sortParam = sortField + "," + sortDir;
+        }
+        model.addAttribute("sortField", sortField);
+        model.addAttribute("sortDir", sortDir);
+        model.addAttribute("sortParam", sortParam);
     }
 }

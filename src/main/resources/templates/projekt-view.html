@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<html lang="pl" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Projekt - Dziennik</title>
@@ -10,10 +10,11 @@
     <div class="logo"><a th:href="${isAuthenticated} ? '/projektList' : '/index'">Dziennik</a></div>
     <nav>
         <ul>
-            <li><a th:href="${isAdmin} ? '/studentList' : '/studentProfile'">Student</a></li>
-            <li><a th:href="@{/zadanieList}">Zadanie</a></li>
-            <li><a th:href="@{/projektList}">Projekt</a></li>
-            <li><a href="/logout" class="btn-light">Wyloguj</a></li>
+            <li sec:authorize="hasRole('ADMIN')"><a href="/studentList">Studenci</a></li>
+            <li sec:authorize="hasRole('USER')"><a href="/studentProfile">Moje dane</a></li>
+            <li sec:authorize="isAuthenticated()"><a th:href="@{/zadanieList}">Zadania</a></li>
+            <li sec:authorize="isAuthenticated()"><a th:href="@{/projektList}">Projekty</a></li>
+            <li sec:authorize="isAuthenticated()"><a href="/logout" class="btn-light">Wyloguj</a></li>
         </ul>
     </nav>
 </header>
@@ -24,9 +25,9 @@
         <p><strong>Id:</strong> <span th:text="${projekt.projektId}">1</span></p>
         <p><strong>Nazwa:</strong> <span th:text="${projekt.nazwa}">Nazwa</span></p>
         <p><strong>Utworzony:</strong>
-            <span th:text="${projekt.dataCzasUtworzenia != null ? #temporals.format(projekt.dataCzasUtworzenia, 'yyyy-MM-dd HH:mm') : '-'}">-</span>
+            <span th:text="${projekt.dataCzasUtworzenia != null ? #temporals.format(projekt.dataCzasUtworzenia, 'dd-MM-yyyy HH:mm') : '-'}">-</span>
         </p>
-        <p><strong>Data oddania:</strong> <span th:text="${projekt.dataOddania}">-</span></p>
+        <p><strong>Data oddania:</strong> <span th:text="${projekt.dataOddania != null ? #temporals.format(projekt.dataOddania, 'dd-MM-yyyy') : '-'}">-</span></p>
     </div>
 
     <div class="form-container">
@@ -37,7 +38,7 @@
     </div>
 
     <h2>Zadania w projekcie</h2>
-    <div class="project-actions">
+    <div class="project-actions" sec:authorize="hasRole('ADMIN')">
         <a href="/zadanieEdit" class="btn-green">Dodaj zadanie</a>
     </div>
 
@@ -46,11 +47,26 @@
     <table class="comparison-table" th:if="${zadania != null and !#lists.isEmpty(zadania)}">
         <thead>
         <tr>
-            <th>Nazwa</th>
+            <th>
+                <a th:href="@{/projektView(projektId=${projekt.projektId}, page=0, size=${pageSize}, sort=${sortField == 'nazwa' and sortDir == 'asc' ? 'nazwa,desc' : 'nazwa,asc'})}">
+                    Nazwa
+                    <span th:if="${sortField == 'nazwa'}" th:text="${sortDir == 'asc' ? ' ▲' : ' ▼'}"> ▲</span>
+                </a>
+            </th>
             <th>Opis</th>
-            <th>Kolejność</th>
-            <th>Dodano</th>
-            <th>Akcje</th>
+            <th>
+                <a th:href="@{/projektView(projektId=${projekt.projektId}, page=0, size=${pageSize}, sort=${sortField == 'kolejnosc' and sortDir == 'asc' ? 'kolejnosc,desc' : 'kolejnosc,asc'})}">
+                    Kolejność
+                    <span th:if="${sortField == 'kolejnosc'}" th:text="${sortDir == 'asc' ? ' ▲' : ' ▼'}"> ▲</span>
+                </a>
+            </th>
+            <th>
+                <a th:href="@{/projektView(projektId=${projekt.projektId}, page=0, size=${pageSize}, sort=${sortField == 'dataCzasDodania' and sortDir == 'asc' ? 'dataCzasDodania,desc' : 'dataCzasDodania,asc'})}">
+                    Dodano
+                    <span th:if="${sortField == 'dataCzasDodania'}" th:text="${sortDir == 'asc' ? ' ▲' : ' ▼'}"> ▲</span>
+                </a>
+            </th>
+            <th sec:authorize="hasRole('ADMIN')">Akcje</th>
         </tr>
         </thead>
         <tbody>
@@ -58,8 +74,8 @@
             <td th:text="${zadanie.nazwa}" style="font-weight:bold;">Nazwa</td>
             <td th:text="${zadanie.opis}">Opis</td>
             <td th:text="${zadanie.kolejnosc}">1</td>
-            <td th:text="${zadanie.dataCzasDodania != null ? #temporals.format(zadanie.dataCzasDodania, 'yyyy-MM-dd HH:mm') : '-'}">-</td>
-            <td>
+            <td th:text="${zadanie.dataCzasDodania != null ? #temporals.format(zadanie.dataCzasDodania, 'dd-MM-yyyy HH:mm') : '-'}">-</td>
+            <td sec:authorize="hasRole('ADMIN')">
                 <div class="action-buttons">
                     <a th:href="@{/zadanieEdit(zadanieId=${zadanie.zadanieId})}" class="btn-green">Edytuj</a>
                     <a th:href="@{/zadanieDelete(zadanieId=${zadanie.zadanieId})}" class="btn-red-small">Usuń</a>
@@ -73,6 +89,7 @@
         <form action="/projektView" method="get" style="display: flex; gap: 10px; align-items: center; justify-content: flex-end;">
             <input type="hidden" name="projektId" th:value="${projekt.projektId}">
             <input type="hidden" name="page" value="0">
+            <input type="hidden" name="sort" th:value="${sortParam}">
             <label for="projektViewPageSize">Na stronie:</label>
             <select id="projektViewPageSize" name="size" onchange="this.form.submit()">
                 <option value="2" th:selected="${pageSize == 2}">2</option>
@@ -89,11 +106,11 @@
 
     <div class="project-actions" th:if="${totalPages != null and totalPages > 1}">
         <a th:if="${currentPage > 0}"
-           th:href="@{/projektView(projektId=${projekt.projektId}, page=${currentPage - 1}, size=${pageSize})}"
+           th:href="@{/projektView(projektId=${projekt.projektId}, page=${currentPage - 1}, size=${pageSize}, sort=${sortParam})}"
            class="btn-light">Prev</a>
         <span th:text="${currentPage + 1} + ' / ' + ${totalPages}">1 / 1</span>
         <a th:if="${currentPage + 1 < totalPages}"
-           th:href="@{/projektView(projektId=${projekt.projektId}, page=${currentPage + 1}, size=${pageSize})}"
+           th:href="@{/projektView(projektId=${projekt.projektId}, page=${currentPage + 1}, size=${pageSize}, sort=${sortParam})}"
            class="btn-light">Next</a>
     </div>
 </section>

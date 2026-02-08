@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<html lang="pl" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Edycja Zadania</title>
@@ -10,9 +10,10 @@
     <div class="logo"><a th:href="${isAuthenticated} ? '/projektList' : '/index'">Dziennik</a></div>
     <nav>
         <ul>
-            <li><a th:href="${isAdmin} ? '/studentList' : '/studentProfile'">Student</a></li>
-            <li><a href="/zadanieList">Zadanie</a></li>
-            <li><a href="/projektList">Projekt</a></li>
+            <li sec:authorize="hasRole('ADMIN')"><a href="/studentList">Studenci</a></li>
+            <li sec:authorize="hasRole('USER')"><a href="/studentProfile">Moje dane</a></li>
+            <li sec:authorize="isAuthenticated()"><a href="/zadanieList">Zadania</a></li>
+            <li sec:authorize="isAuthenticated()"><a href="/projektList">Projekty</a></li>
         </ul>
     </nav>
 </header>

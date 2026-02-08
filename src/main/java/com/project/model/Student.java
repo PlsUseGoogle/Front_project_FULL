@@ -40,6 +40,7 @@ public class Student {
                 .filter(Objects::nonNull)
                 .map(Projekt::getProjektId)
                 .filter(Objects::nonNull)
+                .distinct()
                 .toList();
     }
 }

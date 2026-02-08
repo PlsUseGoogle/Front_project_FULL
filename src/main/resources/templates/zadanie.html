@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<html lang="pl" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Lista Zadań</title>
@@ -10,27 +10,38 @@
     <div class="logo"><a th:href="${isAuthenticated} ? '/projektList' : '/index'">Dziennik</a></div>
     <nav>
         <ul>
-            <li><a th:href="${isAdmin} ? '/studentList' : '/studentProfile'">Student</a></li>
-            <li><a href="/zadanieList">Zadanie</a></li>
-            <li><a href="/projektList">Projekt</a></li>
-            <li><a href="/logout" class="btn-light">Wyloguj</a></li>
+            <li sec:authorize="hasRole('ADMIN')"><a href="/studentList">Studenci</a></li>
+            <li sec:authorize="hasRole('USER')"><a href="/studentProfile">Moje dane</a></li>
+            <li sec:authorize="isAuthenticated()"><a href="/zadanieList">Zadania</a></li>
+            <li sec:authorize="isAuthenticated()"><a href="/projektList">Projekty</a></li>
+            <li sec:authorize="isAuthenticated()"><a href="/logout" class="btn-light">Wyloguj</a></li>
         </ul>
     </nav>
 </header>
 
 <section>
     <h1>Lista Zadań</h1>
-    <div class="project-actions">
+    <div class="project-actions" sec:authorize="hasRole('ADMIN')">
         <a href="/zadanieEdit" class="btn-green">Dodaj zadanie</a>
     </div>
 
     <table class="comparison-table">
         <thead>
         <tr>
-            <th>Nazwa</th>
+            <th>
+                <a th:href="@{/zadanieList(page=0, size=${pageSize}, sort=${sortField == 'nazwa' and sortDir == 'asc' ? 'nazwa,desc' : 'nazwa,asc'})}">
+                    Nazwa
+                    <span th:if="${sortField == 'nazwa'}" th:text="${sortDir == 'asc' ? ' ▲' : ' ▼'}"> ▲</span>
+                </a>
+            </th>
             <th>Opis</th>
-            <th>Kolejność</th>
-            <th>Projekt</th> <th>Akcje</th>
+            <th>
+                <a th:href="@{/zadanieList(page=0, size=${pageSize}, sort=${sortField == 'kolejnosc' and sortDir == 'asc' ? 'kolejnosc,desc' : 'kolejnosc,asc'})}">
+                    Kolejność
+                    <span th:if="${sortField == 'kolejnosc'}" th:text="${sortDir == 'asc' ? ' ▲' : ' ▼'}"> ▲</span>
+                </a>
+            </th>
+            <th>Projekt</th> <th sec:authorize="hasRole('ADMIN')">Akcje</th>
         </tr>
         </thead>
         <tbody>
@@ -47,7 +58,7 @@
                 <span th:if="${zadanie.projekt == null}" style="color: #999;">Brak projektu</span>
             </td>
 
-            <td>
+            <td sec:authorize="hasRole('ADMIN')">
                 <div class="action-buttons">
                     <a th:href="@{/zadanieEdit(zadanieId=${zadanie.zadanieId})}" class="btn-green">Edytuj</a>
                     <a th:href="@{/zadanieDelete(zadanieId=${zadanie.zadanieId})}" class="btn-red-small">Usuń</a>
@@ -60,6 +71,7 @@
     <div class="project-actions">
         <form action="/zadanieList" method="get" style="display: flex; gap: 10px; align-items: center; justify-content: flex-end;">
             <input type="hidden" name="page" value="0">
+            <input type="hidden" name="sort" th:value="${sortParam}">
             <label for="zadaniePageSize">Na stronie:</label>
             <select id="zadaniePageSize" name="size" onchange="this.form.submit()">
                 <option value="2" th:selected="${pageSize == 2}">2</option>
@@ -76,11 +88,11 @@
 
     <div class="project-actions" th:if="${totalPages != null and totalPages > 1}">
         <a th:if="${currentPage > 0}"
-           th:href="@{/zadanieList(page=${currentPage - 1}, size=${pageSize})}"
+           th:href="@{/zadanieList(page=${currentPage - 1}, size=${pageSize}, sort=${sortParam})}"
            class="btn-light">Prev</a>
         <span th:text="${currentPage + 1} + ' / ' + ${totalPages}">1 / 1</span>
         <a th:if="${currentPage + 1 < totalPages}"
-           th:href="@{/zadanieList(page=${currentPage + 1}, size=${pageSize})}"
+           th:href="@{/zadanieList(page=${currentPage + 1}, size=${pageSize}, sort=${sortParam})}"
            class="btn-light">Next</a>
     </div>
 </section>

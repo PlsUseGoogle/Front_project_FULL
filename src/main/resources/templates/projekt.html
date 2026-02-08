@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<html lang="pl" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,29 +11,62 @@
     <div class="logo"><a th:href="${isAuthenticated} ? '/projektList' : '/index'">Dziennik</a></div>
     <nav>
         <ul>
-            <li><a th:href="${isAdmin} ? '/studentList' : '/studentProfile'">Student</a></li>
-            <li><a href="/zadanieList">Zadanie</a></li>
-            <li><a href="/projektList">Projekt</a></li>
-            <li><a href="/logout" class="btn-light">Wyloguj</a></li>
+            <li sec:authorize="hasRole('ADMIN')"><a href="/studentList">Studenci</a></li>
+            <li sec:authorize="hasRole('USER')"><a href="/studentProfile">Moje dane</a></li>
+            <li sec:authorize="isAuthenticated()"><a href="/zadanieList">Zadania</a></li>
+            <li sec:authorize="isAuthenticated()"><a href="/projektList">Projekty</a></li>
+            <li sec:authorize="isAuthenticated()"><a href="/logout" class="btn-light">Wyloguj</a></li>
         </ul>
     </nav>
 </header>
 <section>
-    <h1>Lista projektów</h1>
-    <div class="project-actions">
-        <a th:href="@{/projektEdit}" class="btn-green">Dodaj projekt</a>
+    <h1>Lista Projektów</h1>
+    <div class="project-actions" style="display: flex; justify-content: space-between; align-items: center; gap: 20px;">
+        <div sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/projektEdit}" class="btn-green">Dodaj projekt</a>
+        </div>
+        <form action="/projektList" method="get" style="display:flex; gap:10px;">
+            <input type="text" name="nazwa" placeholder="Szukaj (Nazwa projektu)..."
+                   th:value="${nazwa}"
+                   style="padding: 10px; border-radius: 8px; border: 1px solid #ccc; width: 300px;">
+            <input type="hidden" name="page" value="0">
+            <input type="hidden" name="size" th:value="${pageSize}">
+            <input type="hidden" name="sort" th:value="${sortParam}">
+            <button type="submit" class="btn-green">Szukaj</button>
+            <a href="/projektList" class="btn-light">Reset</a>
+        </form>
     </div>
     <table class="comparison-table" id="projectTable">
         <thead>
         <tr>
-            <th>Id</th>
-            <th>Nazwa</th>
+            <th>
+                <a th:href="@{/projektList(nazwa=${nazwa}, page=0, size=${pageSize}, sort=${sortField == 'projektId' and sortDir == 'asc' ? 'projektId,desc' : 'projektId,asc'})}">
+                    Id
+                    <span th:if="${sortField == 'projektId'}" th:text="${sortDir == 'asc' ? ' ▲' : ' ▼'}"> ▲</span>
+                </a>
+            </th>
+            <th>
+                <a th:href="@{/projektList(nazwa=${nazwa}, page=0, size=${pageSize}, sort=${sortField == 'nazwa' and sortDir == 'asc' ? 'nazwa,desc' : 'nazwa,asc'})}">
+                    Nazwa
+                    <span th:if="${sortField == 'nazwa'}" th:text="${sortDir == 'asc' ? ' ▲' : ' ▼'}"> ▲</span>
+                </a>
+            </th>
             <th>Opis</th>
             <th>Zadania</th>
-            <th>Utworzony</th>
-            <th>Data oddania</th>
+            <th>
+                <a th:href="@{/projektList(nazwa=${nazwa}, page=0, size=${pageSize}, sort=${sortField == 'dataCzasUtworzenia' and sortDir == 'asc' ? 'dataCzasUtworzenia,desc' : 'dataCzasUtworzenia,asc'})}">
+                    Utworzony
+                    <span th:if="${sortField == 'dataCzasUtworzenia'}" th:text="${sortDir == 'asc' ? ' ▲' : ' ▼'}"> ▲</span>
+                </a>
+            </th>
+            <th>
+                <a th:href="@{/projektList(nazwa=${nazwa}, page=0, size=${pageSize}, sort=${sortField == 'dataOddania' and sortDir == 'asc' ? 'dataOddania,desc' : 'dataOddania,asc'})}">
+                    Data oddania
+                    <span th:if="${sortField == 'dataOddania'}" th:text="${sortDir == 'asc' ? ' ▲' : ' ▼'}"> ▲</span>
+                </a>
+            </th>
             <th>Podgląd</th>
-            <th>Edytuj</th>
+            <th sec:authorize="hasRole('ADMIN')">Edytuj</th>
         </tr>
         </thead>
         <tbody>
@@ -42,16 +75,17 @@
             <td th:text="${projekt.nazwa}">Nazwa</td>
             <td th:text="${projekt.opis}">Opis</td>
             <td th:text="${zadaniaCountByProjektId[projekt.projektId]} ?: 0">0</td>
-            <td th:text="${projekt.dataCzasUtworzenia != null ? #temporals.format(projekt.dataCzasUtworzenia, 'yyyy-MM-dd HH:mm') : '-'}">Utworzony</td>
-            <td th:text="${projekt.dataOddania}">Data oddania</td>
+            <td th:text="${projekt.dataCzasUtworzenia != null ? #temporals.format(projekt.dataCzasUtworzenia, 'dd-MM-yyyy HH:mm') : '-'}">Utworzony</td>
+            <td th:text="${projekt.dataOddania != null ? #temporals.format(projekt.dataOddania, 'dd-MM-yyyy') : '-'}">Data oddania</td>
             <td>
                 <a th:href="@{/projektView(projektId=${projekt.projektId})}" class="btn-light">Podgląd</a>
             </td>
-            <td>
+            <td sec:authorize="hasRole('ADMIN')">
                 <div class="action-buttons">
                     <a th:href="@{/projektEdit(projektId=${projekt.projektId})}" class="btn-green">Edytuj</a>
                     <a th:href="@{/projektEdit(projektId=${projekt.projektId}, delete='true')}"
-                       class="btn-red-small">Usuń</a>
+                       class="btn-red-small"
+                       onclick="return confirm('Usunięcie projektu usunie wszystkie jego zadania oraz wypnie przypisanych studentów. Kontynuować?')">Usuń</a>
                 </div>
             </td>
         </tr>
@@ -62,6 +96,7 @@
         <form action="/projektList" method="get" style="display: flex; gap: 10px; align-items: center; justify-content: flex-end;">
             <input type="hidden" name="nazwa" th:value="${nazwa}">
             <input type="hidden" name="page" value="0">
+            <input type="hidden" name="sort" th:value="${sortParam}">
             <label for="projektPageSize">Na stronie:</label>
             <select id="projektPageSize" name="size" onchange="this.form.submit()">
                 <option value="2" th:selected="${pageSize == 2}">2</option>
@@ -78,11 +113,11 @@
 
     <div class="project-actions" th:if="${totalPages != null and totalPages > 1}">
         <a th:if="${currentPage > 0}"
-           th:href="@{/projektList(nazwa=${nazwa}, page=${currentPage - 1}, size=${pageSize})}"
+           th:href="@{/projektList(nazwa=${nazwa}, page=${currentPage - 1}, size=${pageSize}, sort=${sortParam})}"
            class="btn-light">Prev</a>
         <span th:text="${currentPage + 1} + ' / ' + ${totalPages}">1 / 1</span>
         <a th:if="${currentPage + 1 < totalPages}"
-           th:href="@{/projektList(nazwa=${nazwa}, page=${currentPage + 1}, size=${pageSize})}"
+           th:href="@{/projektList(nazwa=${nazwa}, page=${currentPage + 1}, size=${pageSize}, sort=${sortParam})}"
            class="btn-light">Next</a>
     </div>
 </section>

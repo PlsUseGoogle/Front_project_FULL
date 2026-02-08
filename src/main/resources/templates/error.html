@@ -26,6 +26,12 @@
     <p class="subtitle" th:text="${userMessage} ?: 'Wystąpił błąd aplikacji.'">
         Wystąpił błąd aplikacji.
     </p>
+    <div th:if="${technicalDetails != null and technicalDetails.status == 409}" class="error-container">
+        <strong th:text="${userMessage}">Nie można wykonać operacji z powodu powiązanych danych.</strong>
+    </div>
+    <div th:if="${technicalDetails != null and technicalDetails.status == 403}" class="error-container">
+        <strong th:text="${userMessage}">Brak uprawnień do wykonania operacji.</strong>
+    </div>
 
     <div class="error-container">
         <div class="error-section" th:if="${fieldErrors != null and !#lists.isEmpty(fieldErrors)}">

@@ -104,9 +104,9 @@ public class ApiErrorHandler {
         return switch (status) {
             case 400 -> "Nieprawidłowe dane. Sprawdź pola formularza.";
             case 401 -> "Brak autoryzacji. Zaloguj się ponownie.";
-            case 403 -> "Nie masz uprawnień do tej akcji.";
+            case 403 -> "Brak uprawnień do wykonania operacji. Jeśli uważasz, że to błąd, skontaktuj się z administratorem.";
             case 404 -> "Nie znaleziono żądanego zasobu.";
-            case 409 -> "Wystąpił konflikt danych. Spróbuj ponownie.";
+            case 409 -> "Nie można wykonać operacji z powodu powiązanych danych. Usuń/odepnij powiązania i spróbuj ponownie.";
             case 500 -> "Wystąpił błąd serwera.";
             default -> "Wystąpił błąd. Spróbuj ponownie.";
         };

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<html lang="pl" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Dodaj Studenta</title>
@@ -10,11 +10,14 @@
     <div class="logo"><a th:href="${isAuthenticated} ? '/projektList' : '/index'">Dziennik</a></div>
     <nav>
         <ul>
-            <li th:if="${!selfEdit}">
-                <a th:href="${isAdmin} ? '/studentList' : '/studentProfile'">Student</a>
+            <li sec:authorize="hasRole('ADMIN')" th:if="${!selfEdit}">
+                <a href="/studentList">Studenci</a>
             </li>
-            <li><a href="/zadanieList">Zadanie</a></li>
-            <li><a href="/projektList">Projekt</a></li>
+            <li sec:authorize="hasRole('USER')">
+                <a href="/studentProfile">Moje dane</a>
+            </li>
+            <li sec:authorize="isAuthenticated()"><a href="/zadanieList">Zadania</a></li>
+            <li sec:authorize="isAuthenticated()"><a href="/projektList">Projekty</a></li>
         </ul>
     </nav>
 </header>
@@ -59,14 +62,16 @@
                 </select>
             </div>
 
-            <label th:text="${selfEdit ? 'Nowe hasło (opcjonalnie):' : 'Hasło (Opcjonalne):'}"></label>
-            <input type="password" th:field="*{password}" placeholder="Pozostaw puste jeśli bez zmian" autocomplete="new-password">
+            <label th:text="${!selfEdit and student.studentId == null} ? 'Hasło (wymagane):' : 'Nowe hasło (opcjonalnie):'"></label>
+            <input type="password" th:field="*{password}" placeholder="Pozostaw puste jeśli bez zmian" autocomplete="new-password"
+                   th:attr="required=${!selfEdit and student.studentId == null}">
 
             <button type="submit" class="btn-green">Zapisz</button>
             <a th:href="${selfEdit} ? '/projektList' : '/studentList'" class="btn-light">Anuluj</a>
             <a th:if="${!selfEdit and isAdmin and student.studentId != null}"
                th:href="@{/studentDelete(studentId=${student.studentId})}"
-               class="btn-red-small" style="margin-left: 10px;">Usuń</a>
+               class="btn-red-small" style="margin-left: 10px;"
+               onclick="return confirm('Usunięcie studenta wypnie go z wszystkich projektów. Kontynuować?')">Usuń</a>
         </form>
     </div>
 </section>

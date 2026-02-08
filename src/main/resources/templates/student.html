@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<html lang="pl" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Lista Studentów</title>
@@ -10,10 +10,11 @@
     <div class="logo"><a th:href="${isAuthenticated} ? '/projektList' : '/index'">Dziennik</a></div>
     <nav>
         <ul>
-            <li><a th:href="${isAdmin} ? '/studentList' : '/studentProfile'">Student</a></li>
-            <li><a href="/zadanieList">Zadanie</a></li>
-            <li><a href="/projektList">Projekt</a></li>
-            <li><a href="/logout" class="btn-light">Wyloguj</a></li>
+            <li sec:authorize="hasRole('ADMIN')"><a href="/studentList">Studenci</a></li>
+            <li sec:authorize="hasRole('USER')"><a href="/studentProfile">Moje dane</a></li>
+            <li sec:authorize="isAuthenticated()"><a href="/zadanieList">Zadania</a></li>
+            <li sec:authorize="isAuthenticated()"><a href="/projektList">Projekty</a></li>
+            <li sec:authorize="isAuthenticated()"><a href="/logout" class="btn-light">Wyloguj</a></li>
         </ul>
     </nav>
 </header>
@@ -36,10 +37,30 @@
     <table class="comparison-table">
         <thead>
         <tr>
-            <th>Indeks</th>
-            <th>Imię i Nazwisko</th>
-            <th>Email</th>
-            <th>Tryb studiów</th>
+            <th>
+                <a th:href="@{/studentList(keyword=${keyword}, page=0, size=${pageSize}, sort=${sortField == 'nrIndeksu' and sortDir == 'asc' ? 'nrIndeksu,desc' : 'nrIndeksu,asc'})}">
+                    Indeks
+                    <span th:if="${sortField == 'nrIndeksu'}" th:text="${sortDir == 'asc' ? ' ▲' : ' ▼'}"> ▲</span>
+                </a>
+            </th>
+            <th>
+                <a th:href="@{/studentList(keyword=${keyword}, page=0, size=${pageSize}, sort=${sortField == 'nazwisko' and sortDir == 'asc' ? 'nazwisko,desc' : 'nazwisko,asc'})}">
+                    Imię i Nazwisko
+                    <span th:if="${sortField == 'nazwisko'}" th:text="${sortDir == 'asc' ? ' ▲' : ' ▼'}"> ▲</span>
+                </a>
+            </th>
+            <th>
+                <a th:href="@{/studentList(keyword=${keyword}, page=0, size=${pageSize}, sort=${sortField == 'email' and sortDir == 'asc' ? 'email,desc' : 'email,asc'})}">
+                    Email
+                    <span th:if="${sortField == 'email'}" th:text="${sortDir == 'asc' ? ' ▲' : ' ▼'}"> ▲</span>
+                </a>
+            </th>
+            <th>
+                <a th:href="@{/studentList(keyword=${keyword}, page=0, size=${pageSize}, sort=${sortField == 'stacjonarny' and sortDir == 'asc' ? 'stacjonarny,desc' : 'stacjonarny,asc'})}">
+                    Tryb studiów
+                    <span th:if="${sortField == 'stacjonarny'}" th:text="${sortDir == 'asc' ? ' ▲' : ' ▼'}"> ▲</span>
+                </a>
+            </th>
             <th>Akcje</th>
         </tr>
         </thead>
@@ -57,7 +78,8 @@
                 <div class="action-buttons">
                     <a th:href="@{/studentEdit(studentId=${student.studentId})}" class="btn-green">Edytuj</a>
                     <a th:href="@{/studentDelete(studentId=${student.studentId})}"
-                       class="btn-red-small">Usuń</a>
+                       class="btn-red-small"
+                       onclick="return confirm('Usunięcie studenta wypnie go z wszystkich projektów. Kontynuować?')">Usuń</a>
                 </div>
             </td>
         </tr>
@@ -68,6 +90,7 @@
         <form action="/studentList" method="get" style="display: flex; gap: 10px; align-items: center; justify-content: flex-end;">
             <input type="hidden" name="keyword" th:value="${keyword}">
             <input type="hidden" name="page" value="0">
+            <input type="hidden" name="sort" th:value="${sortParam}">
             <label for="studentPageSize">Na stronie:</label>
             <select id="studentPageSize" name="size" onchange="this.form.submit()">
                 <option value="2" th:selected="${pageSize == 2}">2</option>
@@ -84,11 +107,11 @@
 
     <div class="project-actions" th:if="${totalPages != null and totalPages > 1}">
         <a th:if="${currentPage > 0}"
-           th:href="@{/studentList(keyword=${keyword}, page=${currentPage - 1}, size=${pageSize})}"
+           th:href="@{/studentList(keyword=${keyword}, page=${currentPage - 1}, size=${pageSize}, sort=${sortParam})}"
            class="btn-light">Prev</a>
         <span th:text="${currentPage + 1} + ' / ' + ${totalPages}">1 / 1</span>
         <a th:if="${currentPage + 1 < totalPages}"
-           th:href="@{/studentList(keyword=${keyword}, page=${currentPage + 1}, size=${pageSize})}"
+           th:href="@{/studentList(keyword=${keyword}, page=${currentPage + 1}, size=${pageSize}, sort=${sortParam})}"
            class="btn-light">Next</a>
     </div>
 </section>
