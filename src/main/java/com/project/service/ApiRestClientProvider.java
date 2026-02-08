@@ -34,6 +34,18 @@ public class ApiRestClientProvider {
                 .defaultHeaders(headers -> {
                     headers.setBasicAuth(auth.getName(), auth.getCredentials().toString());
                     headers.set(HttpHeaders.ACCEPT, "application/json");
+                    headers.set(HttpHeaders.CONTENT_TYPE, "application/json");
+                })
+                .build();
+    }
+
+    public RestClient clientForAnonymous() {
+        return restClientBuilder
+                .clone()
+                .baseUrl(baseUrl)
+                .defaultHeaders(headers -> {
+                    headers.set(HttpHeaders.ACCEPT, "application/json");
+                    headers.set(HttpHeaders.CONTENT_TYPE, "application/json");
                 })
                 .build();
     }

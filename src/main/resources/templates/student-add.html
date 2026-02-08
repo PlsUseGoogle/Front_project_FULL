@@ -22,6 +22,7 @@
 
     <div class="form-container">
         <form th:action="@{/studentSave}" th:object="${student}" method="post">
+            <input type="hidden" th:field="*{studentId}">
 
             <label>Imię:</label>
             <input type="text" th:field="*{imie}" placeholder="Jan" required>

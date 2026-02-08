@@ -51,12 +51,19 @@ public class ApiAuthenticationProvider implements AuthenticationProvider {
         return new UsernamePasswordAuthenticationToken(
                 username,
                 password,
-                List.of(new SimpleGrantedAuthority("ROLE_USER"))
+                List.of(new SimpleGrantedAuthority(resolveRole(username)))
         );
     }
 
     @Override
     public boolean supports(Class<?> authentication) {
         return UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication);
+    }
+
+    private String resolveRole(String username) {
+        if (username != null && username.equalsIgnoreCase("admin")) {
+            return "ROLE_ADMIN";
+        }
+        return "ROLE_USER";
     }
 }

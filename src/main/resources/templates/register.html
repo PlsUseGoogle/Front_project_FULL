@@ -37,11 +37,15 @@
                 <option th:value="false">Niestacjonarne</option>
             </select>
 
-            <label>E-mail (Twój login):</label>
+            <label>e-mail (Twój login):</label>
             <input type="email" th:field="*{email}" placeholder="student@pbs.edu.pl" required>
 
             <label>Hasło:</label>
-            <input type="password" th:field="*{password}" placeholder="******" required>
+            <input type="password" th:field="*{password}" placeholder="******" required id="password">
+            <label style="display:flex; align-items:center; gap:8px; margin-top:8px; font-size:14px;">
+                <input type="checkbox" id="togglePassword">
+                Pokaż hasło
+            </label>
 
             <button type="submit" class="btn-green" style="width: 100%; margin-top: 10px;">Zarejestruj się</button>
             <a th:href="@{/index}" class="btn-light" style="display:block; text-align:center; margin-top:10px;">Anuluj</a>
@@ -51,5 +55,14 @@
 
 
 <script th:src="@{/js/script.js}"></script>
+<script>
+    const toggle = document.getElementById('togglePassword');
+    const password = document.getElementById('password');
+    if (toggle && password) {
+        toggle.addEventListener('change', () => {
+            password.type = toggle.checked ? 'text' : 'password';
+        });
+    }
+</script>
 </body>
 </html>

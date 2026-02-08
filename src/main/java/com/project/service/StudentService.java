@@ -111,26 +111,19 @@ public class StudentService {
                 .toBodilessEntity();
     }
 
-    private static class StudentRequest {
-        private final String imie;
-        private final String nazwisko;
-        private final String nrIndeksu;
-        private final String email;
-        private final boolean stacjonarny;
-        private final String password;
-        private final List<ProjektRef> projekty;
+    public void registerStudent(Student student) {
+        RestClient restClient = restClientProvider.clientForAnonymous();
+        StudentRegistrationRequest payload = StudentRegistrationRequest.fromStudent(student);
+        restClient.post()
+                .uri("/register")
+                .body(payload)
+                .retrieve()
+                .toBodilessEntity();
+    }
 
-        private StudentRequest(String imie, String nazwisko, String nrIndeksu,
-                               String email, boolean stacjonarny, String password, List<ProjektRef> projekty) {
-            this.imie = imie;
-            this.nazwisko = nazwisko;
-            this.nrIndeksu = nrIndeksu;
-            this.email = email;
-            this.stacjonarny = stacjonarny;
-            this.password = password;
-            this.projekty = projekty;
-        }
-
+    private record StudentRequest(String imie, String nazwisko, String nrIndeksu,
+                                  String email, boolean stacjonarny, String password,
+                                  List<ProjektRef> projekty) {
         static StudentRequest fromStudent(Student student) {
             List<ProjektRef> projekty = student.getProjektIds().stream()
                     .map(ProjektRef::new)
@@ -147,11 +140,19 @@ public class StudentService {
         }
     }
 
-    private static class ProjektRef {
-        private final Integer projektId;
+    private record ProjektRef(Integer projektId) {}
 
-        private ProjektRef(Integer projektId) {
-            this.projektId = projektId;
+    private record StudentRegistrationRequest(String imie, String nazwisko, String nrIndeksu,
+                                              String email, boolean stacjonarny, String password) {
+        static StudentRegistrationRequest fromStudent(Student student) {
+            return new StudentRegistrationRequest(
+                    student.getImie(),
+                    student.getNazwisko(),
+                    student.getNrIndeksu(),
+                    student.getEmail(),
+                    student.isStacjonarny(),
+                    student.getPassword()
+            );
         }
     }
 }

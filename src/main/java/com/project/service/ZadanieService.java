@@ -65,19 +65,7 @@ public class ZadanieService {
                 .toBodilessEntity();
     }
 
-    private static class ZadanieRequest {
-        private final String nazwa;
-        private final String opis;
-        private final Integer kolejnosc;
-        private final ProjektRef projekt;
-
-        private ZadanieRequest(String nazwa, String opis, Integer kolejnosc, ProjektRef projekt) {
-            this.nazwa = nazwa;
-            this.opis = opis;
-            this.kolejnosc = kolejnosc;
-            this.projekt = projekt;
-        }
-
+    private record ZadanieRequest(String nazwa, String opis, Integer kolejnosc, ProjektRef projekt) {
         static ZadanieRequest fromZadanie(Zadanie zadanie) {
             ProjektRef projekt = zadanie.getProjekt() != null && zadanie.getProjekt().getProjektId() != null
                     ? new ProjektRef(zadanie.getProjekt().getProjektId())
@@ -91,11 +79,5 @@ public class ZadanieService {
         }
     }
 
-    private static class ProjektRef {
-        private final Integer projektId;
-
-        private ProjektRef(Integer projektId) {
-            this.projektId = projektId;
-        }
-    }
+    private record ProjektRef(Integer projektId) {}
 }

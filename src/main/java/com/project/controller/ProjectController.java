@@ -38,7 +38,7 @@ public class ProjectController {
     // --- РЕГИСТРАЦИЯ (НОВЫЙ МЕТОД) ---
     @PostMapping("/register")
     public String registerUser(Student student) {
-        studentService.saveStudent(student);
+        studentService.registerStudent(student);
         return "redirect:/index";
     }
 
@@ -131,6 +131,14 @@ public class ProjectController {
         model.addAttribute("student", new Student()); // Пустой объект для формы
         model.addAttribute("listaProjektow", projektService.getProjekty(Pageable.ofSize(1000)).getContent());
         return "student-add"; // Имя нового HTML файла
+    }
+
+    @GetMapping("/studentEdit")
+    public String editStudentPage(@RequestParam Integer studentId, Model model) {
+        Student student = studentService.getStudentById(studentId).orElse(new Student());
+        model.addAttribute("student", student);
+        model.addAttribute("listaProjektow", projektService.getProjekty(Pageable.ofSize(1000)).getContent());
+        return "student-add";
     }
 
     @PostMapping("/studentSave")
