@@ -7,7 +7,7 @@
 </head>
 <body>
 <header>
-    <div class="logo"><a href="/index">Dziennik</a></div>
+    <div class="logo"><a th:href="${isAuthenticated} ? '/projektList' : '/index'">Dziennik</a></div>
     <nav>
         <ul>
             <li th:if="${!selfEdit}">
@@ -20,7 +20,11 @@
 </header>
 
 <section>
-    <h1>Dodaj nowego studenta</h1>
+    <h1>
+        <span th:if="${selfEdit}">Edytuj swoje dane</span>
+        <span th:if="${!selfEdit and isAdmin and student.studentId != null}">Edytuj dane studenta</span>
+        <span th:if="${!selfEdit and (student.studentId == null)}">Dodaj nowego studenta</span>
+    </h1>
 
     <div class="form-container">
         <form th:action="@{${formAction}}" th:object="${student}" method="post">
