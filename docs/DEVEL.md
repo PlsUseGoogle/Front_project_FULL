@@ -16,6 +16,28 @@ Proces tworzenia artefaktów i paczek.
 | `bootBuildImage` | Buduje obraz OCI (Docker/Podman) bezpośrednio z kodu, bez Dockerfile. |
 | `classes` | Tylko kompilacja plików źródłowych Java. |
 
+### 🧹 Clean build + artefakt
+Linux/macOS:
+```bash
+./gradlew clean bootJar
+```
+Windows:
+```bat
+.\gradlew.bat clean bootJar
+```
+
+Po zbudowaniu plik JAR znajduje się w: `build/libs/`
+
+### ▶️ Uruchamianie JAR
+Linux/macOS:
+```bash
+java -jar build/libs/<nazwa-pliku>.jar
+```
+Windows:
+```bat
+java -jar build\libs\<nazwa-pliku>.jar
+```
+
 ## 🧪 Testy i Weryfikacja
 Zapewnienie jakości kodu.
 
@@ -25,6 +47,16 @@ Zapewnienie jakości kodu.
 
 ## 🚀 Uruchamianie (Localhost)
 * **`bootRun`** – Startuje aplikację Spring Boot bezpośrednio z kodu źródłowego (Hot Swap możliwy).
+* Po starcie aplikacja jest dostępna domyślnie pod: **http://localhost:8080**
+
+Linux/macOS:
+```bash
+./gradlew bootRun
+```
+Windows (PowerShell):
+```bat
+.\gradlew.bat bootRun
+```
 
 ## 🔍 Analiza Zależności (Dependency Hell Fighter)
 Narzędzia do debugowania konfliktów wersji i struktury projektu.
