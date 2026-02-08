@@ -29,6 +29,9 @@ public class ApiErrorHandler {
         int status = apiError.getStatus() != null ? apiError.getStatus() : ex.getStatusCode().value();
         String title = titleForStatus(status);
         String userMessage = messageForStatus(status);
+        if ((status == 400 || status == 404) && apiError.getMessage() != null && !apiError.getMessage().isBlank()) {
+            userMessage = apiError.getMessage();
+        }
         fillModel(model, apiError, title, userMessage, status, request);
         return "error";
     }

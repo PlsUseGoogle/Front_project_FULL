@@ -43,7 +43,10 @@
             <input type="text" th:field="*{nrIndeksu}" placeholder="12345" required>
 
             <label>E-mail:</label>
-            <input type="email" th:field="*{email}" placeholder="student@pbs.edu.pl" required>
+            <input type="email" th:field="*{email}" placeholder="student@pbs.edu.pl" maxlength="254" required>
+            <p th:if="${selfEdit}" style="font-size: 12px; color: #666; margin-top: 6px;">
+                Zmiana e-maila wymaga ponownego logowania z nowym adresem.
+            </p>
 
             <label>Forma studiów:</label>
             <select th:field="*{stacjonarny}" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 15px;">
