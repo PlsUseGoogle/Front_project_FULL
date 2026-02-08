@@ -29,6 +29,7 @@
             <th>Id</th>
             <th>Nazwa</th>
             <th>Opis</th>
+            <th>Zadania</th>
             <th>Utworzony</th>
             <th>Data oddania</th>
             <th>Edytuj</th>
@@ -39,12 +40,13 @@
             <td th:text="${projekt.projektId}">Id</td>
             <td th:text="${projekt.nazwa}">Nazwa</td>
             <td th:text="${projekt.opis}">Opis</td>
+            <td th:text="${zadaniaCountByProjektId[projekt.projektId]} ?: 0">0</td>
             <td th:text="${#temporals.format(projekt.dataCzasUtworzenia, 'yyyy-MM-dd HH:mm')}">Utworzony</td>
             <td th:text="${projekt.dataOddania}">Data oddania</td>
             <td>
                 <a th:href="@{/projektEdit(projektId=${projekt.projektId})}" class="btn-green">Edytuj</a>
                 <a th:href="@{/projektEdit(projektId=${projekt.projektId}, delete='true')}"
-                   style="color: red; margin-left: 10px;">Usuń</a>
+                   class="btn-red-small" style="margin-left: 10px;">Usuń</a>
             </td>
         </tr>
         </tbody>

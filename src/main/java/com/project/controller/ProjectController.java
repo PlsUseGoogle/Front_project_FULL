@@ -13,6 +13,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @Controller
 public class ProjectController {
 
@@ -51,11 +55,21 @@ public class ProjectController {
     // --- ПРОЕКТЫ ---
     @GetMapping("/projektList")
     public String listProjekty(@RequestParam(required = false) String nazwa, Model model, Pageable pageable) {
+        List<Projekt> projekty;
         if (nazwa != null && !nazwa.isBlank()) {
-            model.addAttribute("projekty", projektService.searchByNazwa(nazwa, pageable).getContent());
+            projekty = projektService.searchByNazwa(nazwa, pageable).getContent();
         } else {
-            model.addAttribute("projekty", projektService.getProjekty(pageable).getContent());
+            projekty = projektService.getProjekty(pageable).getContent();
         }
+        Map<Integer, Long> zadaniaCountByProjektId = new HashMap<>();
+        for (Projekt projekt : projekty) {
+            if (projekt.getProjektId() != null) {
+                long count = zadanieService.countZadaniaForProjekt(projekt.getProjektId());
+                zadaniaCountByProjektId.put(projekt.getProjektId(), count);
+            }
+        }
+        model.addAttribute("projekty", projekty);
+        model.addAttribute("zadaniaCountByProjektId", zadaniaCountByProjektId);
         return "projekt";
     }
 
@@ -148,6 +162,12 @@ public class ProjectController {
     @PostMapping("/studentSave")
     public String saveStudentFromForm(Student student) {
         studentService.saveStudent(student);
+        return "redirect:/studentList";
+    }
+
+    @GetMapping("/studentDelete")
+    public String deleteStudent(@RequestParam Integer studentId) {
+        studentService.deleteStudent(studentId);
         return "redirect:/studentList";
     }
 

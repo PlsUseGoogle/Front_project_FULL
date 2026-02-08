@@ -86,6 +86,16 @@ nav ul li a {
     font-weight: bold;
 }
 
+.btn-red-small {
+    background: #b71c1c;
+    color: #fff;
+    padding: 8px 20px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
 section {
     padding: 140px 60px 80px;
     max-width: 1400px;
@@ -246,6 +256,58 @@ footer {
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 8px;
+}
+
+.error-container {
+    max-width: 720px;
+    margin: 40px auto;
+    padding: 30px;
+    border: 1px solid #eee;
+    border-radius: 18px;
+    background: #fff;
+}
+
+.error-section {
+    margin-top: 25px;
+}
+
+.error-section h2 {
+    font-size: 22px;
+    margin-bottom: 12px;
+}
+
+.error-list {
+    list-style: disc;
+    padding-left: 20px;
+    color: #555;
+}
+
+.error-details {
+    font-size: 14px;
+    color: #555;
+    background: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: 14px;
+    padding: 16px;
+}
+
+.error-details dl {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 8px 12px;
+}
+
+.error-details dt {
+    font-weight: bold;
+    color: #333;
+}
+
+.error-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: center;
+    margin-top: 30px;
 }
 
 .project-actions {

@@ -41,6 +41,7 @@
             <th>Email</th>
             <th>Tryb studiów</th>
             <th>Edytuj</th>
+            <th>Usuń</th>
         </tr>
         </thead>
         <tbody>
@@ -55,6 +56,10 @@
             </td>
             <td>
                 <a th:href="@{/studentEdit(studentId=${student.studentId})}" class="btn-green">Edytuj</a>
+            </td>
+            <td>
+                <a th:href="@{/studentDelete(studentId=${student.studentId})}"
+                   class="btn-red-small">Usuń</a>
             </td>
         </tr>
         </tbody>

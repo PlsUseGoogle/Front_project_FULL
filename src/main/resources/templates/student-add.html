@@ -64,6 +64,9 @@
 
             <button type="submit" class="btn-green">Zapisz</button>
             <a th:href="${selfEdit} ? '/projektList' : '/studentList'" class="btn-light">Anuluj</a>
+            <a th:if="${!selfEdit and isAdmin and student.studentId != null}"
+               th:href="@{/studentDelete(studentId=${student.studentId})}"
+               class="btn-red-small" style="margin-left: 10px;">Usuń</a>
         </form>
     </div>
 </section>

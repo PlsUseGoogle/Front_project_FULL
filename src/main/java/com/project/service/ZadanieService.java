@@ -65,6 +65,19 @@ public class ZadanieService {
                 .toBodilessEntity();
     }
 
+    public long countZadaniaForProjekt(Integer projektId) {
+        RestClient restClient = restClientProvider.clientForCurrentUser();
+        RestResponsePage<Zadanie> page = restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/projekty/{projektId}/zadania")
+                        .queryParam("page", 0)
+                        .queryParam("size", 1)
+                        .build(projektId))
+                .retrieve()
+                .body(new ParameterizedTypeReference<>() {});
+        return page != null ? page.getTotalElements() : 0L;
+    }
+
     private record ZadanieRequest(String nazwa, String opis, Integer kolejnosc, ProjektRef projekt) {
         static ZadanieRequest fromZadanie(Zadanie zadanie) {
             ProjektRef projekt = zadanie.getProjekt() != null && zadanie.getProjekt().getProjektId() != null

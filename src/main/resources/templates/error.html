@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Błąd - Dziennik</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header>
+    <div class="logo"><a th:href="${isAuthenticated} ? '/projektList' : '/index'">Dziennik</a></div>
+    <nav>
+        <ul>
+            <li th:if="${isAuthenticated}">
+                <a th:href="${isAdmin} ? '/studentList' : '/studentProfile'">Student</a>
+            </li>
+            <li th:if="${isAuthenticated}"><a href="/zadanieList">Zadanie</a></li>
+            <li th:if="${isAuthenticated}"><a href="/projektList">Projekt</a></li>
+            <li th:if="${isAuthenticated}"><a href="/logout" class="btn-light">Wyloguj</a></li>
+        </ul>
+    </nav>
+</header>
+
+<section>
+    <h1 th:text="${errorTitle} ?: 'Wystąpił błąd'">Wystąpił błąd</h1>
+    <p class="subtitle" th:text="${userMessage} ?: 'Wystąpił błąd aplikacji.'">
+        Wystąpił błąd aplikacji.
+    </p>
+
+    <div class="error-container">
+        <div class="error-section" th:if="${fieldErrors != null and !#lists.isEmpty(fieldErrors)}">
+            <h2>Co poprawić?</h2>
+            <ul class="error-list">
+                <li th:each="fieldError : ${fieldErrors}">
+                    <span th:text="${fieldError.field}">Pole</span>
+                    <span th:if="${fieldError.message != null}" th:text="${' - ' + fieldError.message}"> - komunikat</span>
+                </li>
+            </ul>
+        </div>
+
+        <div class="error-section" th:if="${isAdmin and technicalDetails != null}">
+            <h2>Szczegóły techniczne</h2>
+            <div class="error-details">
+                <dl>
+                    <dt>Status</dt>
+                    <dd th:text="${technicalDetails.status} ?: '-'">-</dd>
+                    <dt>Error</dt>
+                    <dd th:text="${technicalDetails.error} ?: '-'">-</dd>
+                    <dt>Message</dt>
+                    <dd th:text="${technicalDetails.message} ?: '-'">-</dd>
+                    <dt>Path</dt>
+                    <dd th:text="${technicalDetails.path} ?: '-'">-</dd>
+                    <dt>Timestamp</dt>
+                    <dd th:text="${technicalDetails.timestamp} ?: '-'">-</dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="error-actions">
+            <button type="button" class="btn-light" onclick="history.back()">Wróć</button>
+            <a th:href="${isAuthenticated} ? '/projektList' : '/index'" class="btn-green">Strona główna</a>
+        </div>
+    </div>
+</section>
+</body>
+</html>
