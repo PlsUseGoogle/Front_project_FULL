@@ -1,5 +1,6 @@
 package com.project.model;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -16,6 +17,7 @@ public class Projekt {
     private String opis;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
+    @JsonAlias("dataczasUtworzenia")
     private LocalDateTime dataCzasUtworzenia;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")

@@ -2,6 +2,9 @@ package com.project.service;
 
 import com.project.model.Student;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -18,21 +21,21 @@ public class StudentService {
         this.restClientProvider = restClientProvider;
     }
 
-    public List<Student> getAllStudents() {
+    public Page<Student> getAllStudents(Pageable pageable) {
         RestClient restClient = restClientProvider.clientForCurrentUser();
         RestResponsePage<Student> page = restClient.get()
                 .uri(uriBuilder -> uriBuilder.path(RESOURCE_PATH)
-                        .queryParam("page", 0)
-                        .queryParam("size", 1000)
+                        .queryParam("page", pageable.getPageNumber())
+                        .queryParam("size", pageable.getPageSize())
                         .build())
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {});
-        return page != null ? page.getContent() : List.of();
+        return page != null ? page : new RestResponsePage<>();
     }
 
-    public List<Student> searchStudents(String keyword) {
+    public Page<Student> searchStudents(String keyword, Pageable pageable) {
         if (keyword == null || keyword.isBlank()) {
-            return getAllStudents();
+            return getAllStudents(pageable);
         }
 
         RestClient restClient = restClientProvider.clientForCurrentUser();
@@ -41,39 +44,33 @@ public class StudentService {
                     .uri(RESOURCE_PATH + "/nrIndeksu/{nrIndeksu}", keyword)
                     .retrieve()
                     .body(Student.class);
-            return student != null ? List.of(student) : List.of();
+            List<Student> content = student != null ? List.of(student) : List.of();
+            return new PageImpl<>(content, pageable, content.size());
         }
 
         String param = keyword.contains("@") ? "email" : null;
         if (param != null) {
-            return searchByParam(param, keyword);
+            return searchByParam(param, keyword, pageable);
         }
 
-        List<Student> byNazwisko = searchByParam("nazwisko", keyword);
-        List<Student> byImie = searchByParam("imie", keyword);
-
-        if (byNazwisko.isEmpty() && byImie.isEmpty()) {
-            return List.of();
+        Page<Student> byNazwisko = searchByParam("nazwisko", keyword, pageable);
+        if (!byNazwisko.isEmpty()) {
+            return byNazwisko;
         }
-
-        return java.util.stream.Stream.concat(byNazwisko.stream(), byImie.stream())
-                .collect(java.util.stream.Collectors.collectingAndThen(
-                        java.util.stream.Collectors.toMap(Student::getStudentId, s -> s, (a, b) -> a),
-                        map -> map.values().stream().toList()
-                ));
+        return searchByParam("imie", keyword, pageable);
     }
 
-    private List<Student> searchByParam(String paramName, String value) {
+    private Page<Student> searchByParam(String paramName, String value, Pageable pageable) {
         RestClient restClient = restClientProvider.clientForCurrentUser();
         RestResponsePage<Student> page = restClient.get()
                 .uri(uriBuilder -> uriBuilder.path(RESOURCE_PATH)
                         .queryParam(paramName, value)
-                        .queryParam("page", 0)
-                        .queryParam("size", 1000)
+                        .queryParam("page", pageable.getPageNumber())
+                        .queryParam("size", pageable.getPageSize())
                         .build())
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {});
-        return page != null ? page.getContent() : List.of();
+        return page != null ? page : new RestResponsePage<>();
     }
 
     public Optional<Student> getStudentById(Integer id) {

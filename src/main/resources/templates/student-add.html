@@ -59,8 +59,8 @@
                 </select>
             </div>
 
-            <label th:text="${selfEdit ? 'Nowe hasło (opcjonalnie):' : 'Hasło (Opcjonalne, domyślnie 123):'}"></label>
-            <input type="text" th:field="*{password}" placeholder="Pozostaw puste jeśli bez zmian">
+            <label th:text="${selfEdit ? 'Nowe hasło (opcjonalnie):' : 'Hasło (Opcjonalne):'}"></label>
+            <input type="password" th:field="*{password}" placeholder="Pozostaw puste jeśli bez zmian" autocomplete="new-password">
 
             <button type="submit" class="btn-green">Zapisz</button>
             <a th:href="${selfEdit} ? '/projektList' : '/studentList'" class="btn-light">Anuluj</a>

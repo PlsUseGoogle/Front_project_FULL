@@ -1,5 +1,6 @@
 package com.project.model;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.project.model.Projekt;
 import lombok.AllArgsConstructor;
@@ -20,5 +21,6 @@ public class Zadanie {
     private Projekt projekt;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
+    @JsonAlias("dataczasDodania")
     private LocalDateTime dataCzasDodania;
 }

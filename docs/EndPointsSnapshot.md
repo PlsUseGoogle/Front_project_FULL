@@ -1,6 +1,6 @@
 # EndPoints Snapshot
 
-Data i godzina: 2026-02-08 15:17:12 CET
+Data i godzina: 2026-02-08 16:16:12 CET
 
 ## Informacje ogolne
 - Bazowa sciezka: `/api`
@@ -202,7 +202,6 @@ Backend zwraca spójny JSON dla bledow (np. 400/404):
 ```
 
 ### POST /api/studenci
-Nota: pole `password` jest ignorowane w backendzie dla tego endpointu.
 ```json
 {
   "method": "POST",
@@ -214,6 +213,7 @@ Nota: pole `password` jest ignorowane w backendzie dla tego endpointu.
     "nazwisko": "Kowalski",
     "nrIndeksu": "12345",
     "email": "jan.kowalski@example.com",
+    "password": "haslo123",
     "stacjonarny": true,
     "projekty": [
       {
@@ -238,6 +238,7 @@ Nota: pole `password` jest ignorowane w backendzie dla tego endpointu.
     "nazwisko": "Kowalski",
     "nrIndeksu": "12345",
     "email": "jan.kowalski@example.com",
+    "password": "noweHaslo",
     "stacjonarny": false,
     "projekty": [
       {

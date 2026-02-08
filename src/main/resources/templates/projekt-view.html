@@ -2,8 +2,8 @@
 <html lang="pl" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Lista Zadań</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <title>Projekt - Dziennik</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
 <header>
@@ -11,26 +11,46 @@
     <nav>
         <ul>
             <li><a th:href="${isAdmin} ? '/studentList' : '/studentProfile'">Student</a></li>
-            <li><a href="/zadanieList">Zadanie</a></li>
-            <li><a href="/projektList">Projekt</a></li>
+            <li><a th:href="@{/zadanieList}">Zadanie</a></li>
+            <li><a th:href="@{/projektList}">Projekt</a></li>
             <li><a href="/logout" class="btn-light">Wyloguj</a></li>
         </ul>
     </nav>
 </header>
 
 <section>
-    <h1>Lista Zadań</h1>
+    <h1>Projekt</h1>
+    <div class="form-container">
+        <p><strong>Id:</strong> <span th:text="${projekt.projektId}">1</span></p>
+        <p><strong>Nazwa:</strong> <span th:text="${projekt.nazwa}">Nazwa</span></p>
+        <p><strong>Utworzony:</strong>
+            <span th:text="${projekt.dataCzasUtworzenia != null ? #temporals.format(projekt.dataCzasUtworzenia, 'yyyy-MM-dd HH:mm') : '-'}">-</span>
+        </p>
+        <p><strong>Data oddania:</strong> <span th:text="${projekt.dataOddania}">-</span></p>
+    </div>
+
+    <div class="form-container">
+        <label for="projektOpis"><strong>Opis projektu</strong></label>
+        <textarea id="projektOpis" rows="5" readonly
+                  style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; background: #f9f9f9;"
+                  th:text="${projekt.opis}">Opis</textarea>
+    </div>
+
+    <h2>Zadania w projekcie</h2>
     <div class="project-actions">
         <a href="/zadanieEdit" class="btn-green">Dodaj zadanie</a>
     </div>
 
-    <table class="comparison-table">
+    <p th:if="${zadania == null or #lists.isEmpty(zadania)}" class="subtitle">Brak zadań przypisanych do projektu.</p>
+
+    <table class="comparison-table" th:if="${zadania != null and !#lists.isEmpty(zadania)}">
         <thead>
         <tr>
             <th>Nazwa</th>
             <th>Opis</th>
             <th>Kolejność</th>
-            <th>Projekt</th> <th>Akcje</th>
+            <th>Dodano</th>
+            <th>Akcje</th>
         </tr>
         </thead>
         <tbody>
@@ -38,15 +58,7 @@
             <td th:text="${zadanie.nazwa}" style="font-weight:bold;">Nazwa</td>
             <td th:text="${zadanie.opis}">Opis</td>
             <td th:text="${zadanie.kolejnosc}">1</td>
-
-            <td>
-                <span th:if="${zadanie.projekt != null}"
-                      th:text="${zadanie.projekt.nazwa != null ? zadanie.projekt.nazwa : 'ID: ' + zadanie.projekt.projektId}"
-                      style="display:inline-block; background:#f0f0f0; padding:2px 8px; border-radius:4px; font-size:13px;">
-                </span>
-                <span th:if="${zadanie.projekt == null}" style="color: #999;">Brak projektu</span>
-            </td>
-
+            <td th:text="${zadanie.dataCzasDodania != null ? #temporals.format(zadanie.dataCzasDodania, 'yyyy-MM-dd HH:mm') : '-'}">-</td>
             <td>
                 <div class="action-buttons">
                     <a th:href="@{/zadanieEdit(zadanieId=${zadanie.zadanieId})}" class="btn-green">Edytuj</a>
@@ -58,10 +70,11 @@
     </table>
 
     <div class="project-actions">
-        <form action="/zadanieList" method="get" style="display: flex; gap: 10px; align-items: center; justify-content: flex-end;">
+        <form action="/projektView" method="get" style="display: flex; gap: 10px; align-items: center; justify-content: flex-end;">
+            <input type="hidden" name="projektId" th:value="${projekt.projektId}">
             <input type="hidden" name="page" value="0">
-            <label for="zadaniePageSize">Na stronie:</label>
-            <select id="zadaniePageSize" name="size" onchange="this.form.submit()">
+            <label for="projektViewPageSize">Na stronie:</label>
+            <select id="projektViewPageSize" name="size" onchange="this.form.submit()">
                 <option value="2" th:selected="${pageSize == 2}">2</option>
                 <option value="3" th:selected="${pageSize == 3}">3</option>
                 <option value="5" th:selected="${pageSize == 5}">5</option>
@@ -76,11 +89,11 @@
 
     <div class="project-actions" th:if="${totalPages != null and totalPages > 1}">
         <a th:if="${currentPage > 0}"
-           th:href="@{/zadanieList(page=${currentPage - 1}, size=${pageSize})}"
+           th:href="@{/projektView(projektId=${projekt.projektId}, page=${currentPage - 1}, size=${pageSize})}"
            class="btn-light">Prev</a>
         <span th:text="${currentPage + 1} + ' / ' + ${totalPages}">1 / 1</span>
         <a th:if="${currentPage + 1 < totalPages}"
-           th:href="@{/zadanieList(page=${currentPage + 1}, size=${pageSize})}"
+           th:href="@{/projektView(projektId=${projekt.projektId}, page=${currentPage + 1}, size=${pageSize})}"
            class="btn-light">Next</a>
     </div>
 </section>

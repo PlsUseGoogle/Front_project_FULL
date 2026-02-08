@@ -46,7 +46,7 @@ public class ProjectController {
         return "redirect:/index";
     }
 
-    @GetMapping("/register.html")
+    @GetMapping({"/register", "/register.html"})
     public String registerPage(Model model) {
         model.addAttribute("student", new Student()); // Пустой объект для формы
         return "register";
@@ -56,11 +56,13 @@ public class ProjectController {
     @GetMapping("/projektList")
     public String listProjekty(@RequestParam(required = false) String nazwa, Model model, Pageable pageable) {
         List<Projekt> projekty;
+        org.springframework.data.domain.Page<Projekt> pageProjekty;
         if (nazwa != null && !nazwa.isBlank()) {
-            projekty = projektService.searchByNazwa(nazwa, pageable).getContent();
+            pageProjekty = projektService.searchByNazwa(nazwa, pageable);
         } else {
-            projekty = projektService.getProjekty(pageable).getContent();
+            pageProjekty = projektService.getProjekty(pageable);
         }
+        projekty = pageProjekty.getContent();
         Map<Integer, Long> zadaniaCountByProjektId = new HashMap<>();
         for (Projekt projekt : projekty) {
             if (projekt.getProjektId() != null) {
@@ -70,6 +72,11 @@ public class ProjectController {
         }
         model.addAttribute("projekty", projekty);
         model.addAttribute("zadaniaCountByProjektId", zadaniaCountByProjektId);
+        model.addAttribute("pageProjekty", pageProjekty);
+        model.addAttribute("nazwa", nazwa);
+        model.addAttribute("currentPage", pageProjekty.getNumber());
+        model.addAttribute("totalPages", pageProjekty.getTotalPages());
+        model.addAttribute("pageSize", pageProjekty.getSize());
         return "projekt";
     }
 
@@ -87,6 +94,19 @@ public class ProjectController {
         model.addAttribute("projekt", projektId != null ? projektService.getProjekt(projektId).orElse(new Projekt()) : new Projekt());
         return "project-edit";
     }
+
+    @GetMapping("/projektView")
+    public String viewProjekt(@RequestParam Integer projektId, Model model, Pageable pageable) {
+        Projekt projekt = projektService.getProjekt(projektId).orElse(new Projekt());
+        var pageZadania = zadanieService.getZadaniaByProjekt(projektId, pageable);
+        model.addAttribute("projekt", projekt);
+        model.addAttribute("zadania", pageZadania.getContent());
+        model.addAttribute("pageZadania", pageZadania);
+        model.addAttribute("currentPage", pageZadania.getNumber());
+        model.addAttribute("totalPages", pageZadania.getTotalPages());
+        model.addAttribute("pageSize", pageZadania.getSize());
+        return "projekt-view";
+    }
     @PostMapping("/projektEdit")
     public String saveProjekt(Projekt projekt) {
         projektService.setProjekt(projekt);
@@ -95,8 +115,14 @@ public class ProjectController {
 
     // --- СТУДЕНТЫ ---
     @GetMapping("/studentList")
-    public String listStudentow(@RequestParam(required = false) String keyword, Model model) {
-        model.addAttribute("studenci", studentService.searchStudents(keyword));
+    public String listStudentow(@RequestParam(required = false) String keyword, Model model, Pageable pageable) {
+        var page = studentService.searchStudents(keyword, pageable);
+        model.addAttribute("studenci", page.getContent());
+        model.addAttribute("pageStudenci", page);
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("currentPage", page.getNumber());
+        model.addAttribute("totalPages", page.getTotalPages());
+        model.addAttribute("pageSize", page.getSize());
         return "student";
     }
 
@@ -105,8 +131,13 @@ public class ProjectController {
 
     // --- ЗАДАЧИ ---
     @GetMapping("/zadanieList")
-    public String listZadania(Model model) {
-        model.addAttribute("zadania", zadanieService.getAllZadania());
+    public String listZadania(Model model, Pageable pageable) {
+        var page = zadanieService.getZadaniaPage(pageable);
+        model.addAttribute("zadania", page.getContent());
+        model.addAttribute("pageZadania", page);
+        model.addAttribute("currentPage", page.getNumber());
+        model.addAttribute("totalPages", page.getTotalPages());
+        model.addAttribute("pageSize", page.getSize());
         return "zadanie";
     }
 

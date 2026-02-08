@@ -1,6 +1,8 @@
 package com.project.service;
 
 import com.project.model.Zadanie;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.client.RestClient;
@@ -30,6 +32,20 @@ public class ZadanieService {
         return page != null ? page.getContent() : List.of();
     }
 
+    public Page<Zadanie> getZadaniaPage(Pageable pageable) {
+        RestClient restClient = restClientProvider.clientForCurrentUser();
+        RestResponsePage<Zadanie> page = restClient.get()
+                .uri(uriBuilder -> ServiceUtil.applySort(
+                                uriBuilder.path(RESOURCE_PATH)
+                                        .queryParam("page", pageable.getPageNumber())
+                                        .queryParam("size", pageable.getPageSize()),
+                                pageable.getSort())
+                        .build())
+                .retrieve()
+                .body(new ParameterizedTypeReference<>() {});
+        return page != null ? page : new RestResponsePage<>();
+    }
+
     public Optional<Zadanie> getZadanie(Integer id) {
         RestClient restClient = restClientProvider.clientForCurrentUser();
         Zadanie zadanie = restClient.get()
@@ -37,6 +53,20 @@ public class ZadanieService {
                 .retrieve()
                 .body(Zadanie.class);
         return Optional.ofNullable(zadanie);
+    }
+
+    public Page<Zadanie> getZadaniaByProjekt(Integer projektId, Pageable pageable) {
+        RestClient restClient = restClientProvider.clientForCurrentUser();
+        RestResponsePage<Zadanie> page = restClient.get()
+                .uri(uriBuilder -> ServiceUtil.applySort(
+                                uriBuilder.path("/projekty/{projektId}/zadania")
+                                        .queryParam("page", pageable.getPageNumber())
+                                        .queryParam("size", pageable.getPageSize()),
+                                pageable.getSort())
+                        .build(projektId))
+                .retrieve()
+                .body(new ParameterizedTypeReference<>() {});
+        return page != null ? page : new RestResponsePage<>();
     }
 
     public void saveZadanie(Zadanie zadanie) {
