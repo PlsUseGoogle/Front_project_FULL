@@ -121,6 +121,25 @@ public class StudentService {
                 .toBodilessEntity();
     }
 
+    public Optional<Student> getCurrentStudent() {
+        RestClient restClient = restClientProvider.clientForCurrentUser();
+        Student student = restClient.get()
+                .uri(RESOURCE_PATH + "/me")
+                .retrieve()
+                .body(Student.class);
+        return Optional.ofNullable(student);
+    }
+
+    public void updateCurrentStudent(Student student) {
+        RestClient restClient = restClientProvider.clientForCurrentUser();
+        StudentProfileRequest payload = StudentProfileRequest.fromStudent(student);
+        restClient.put()
+                .uri(RESOURCE_PATH + "/me")
+                .body(payload)
+                .retrieve()
+                .toBodilessEntity();
+    }
+
     private record StudentRequest(String imie, String nazwisko, String nrIndeksu,
                                   String email, boolean stacjonarny, String password,
                                   List<ProjektRef> projekty) {
@@ -152,6 +171,24 @@ public class StudentService {
                     student.getEmail(),
                     student.isStacjonarny(),
                     student.getPassword()
+            );
+        }
+    }
+
+    private record StudentProfileRequest(String imie, String nazwisko, String nrIndeksu,
+                                         String email, boolean stacjonarny, String password) {
+        static StudentProfileRequest fromStudent(Student student) {
+            String password = student.getPassword();
+            if (password != null && password.isBlank()) {
+                password = null;
+            }
+            return new StudentProfileRequest(
+                    student.getImie(),
+                    student.getNazwisko(),
+                    student.getNrIndeksu(),
+                    student.getEmail(),
+                    student.isStacjonarny(),
+                    password
             );
         }
     }

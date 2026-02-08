@@ -22,7 +22,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Разрешаем вход на главную, регистрацию и к стилям/картинкам без пароля
                         .requestMatchers("/", "/index", "/index.html", "/register", "/register.html", "/css/**", "/js/**", "/images/**").permitAll()
-                        .requestMatchers("/studentAdd", "/studentSave").hasRole("ADMIN")
+                        .requestMatchers("/studentAdd", "/studentSave", "/studentEdit", "/studentList").hasRole("ADMIN")
+                        .requestMatchers("/studentProfile", "/studentProfileSave").hasAnyRole("USER", "ADMIN")
                         // Всё остальное (студенты, проекты) - только для вошедших
                         .anyRequest().authenticated()
                 )

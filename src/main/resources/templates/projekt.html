@@ -11,7 +11,7 @@
     <div class="logo"><a href="/index">Dziennik</a></div>
     <nav>
         <ul>
-            <li><a href="/studentList">Student</a></li>
+            <li><a th:href="${isAdmin} ? '/studentList' : '/studentProfile'">Student</a></li>
             <li><a href="/zadanieList">Zadanie</a></li>
             <li><a href="/projektList">Projekt</a></li>
             <li><a href="/logout" class="btn-light">Wyloguj</a></li>

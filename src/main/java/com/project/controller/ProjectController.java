@@ -130,6 +130,8 @@ public class ProjectController {
     public String addStudentPage(Model model) {
         model.addAttribute("student", new Student()); // Пустой объект для формы
         model.addAttribute("listaProjektow", projektService.getProjekty(Pageable.ofSize(1000)).getContent());
+        model.addAttribute("formAction", "/studentSave");
+        model.addAttribute("selfEdit", false);
         return "student-add"; // Имя нового HTML файла
     }
 
@@ -138,6 +140,8 @@ public class ProjectController {
         Student student = studentService.getStudentById(studentId).orElse(new Student());
         model.addAttribute("student", student);
         model.addAttribute("listaProjektow", projektService.getProjekty(Pageable.ofSize(1000)).getContent());
+        model.addAttribute("formAction", "/studentSave");
+        model.addAttribute("selfEdit", false);
         return "student-add";
     }
 
@@ -145,5 +149,20 @@ public class ProjectController {
     public String saveStudentFromForm(Student student) {
         studentService.saveStudent(student);
         return "redirect:/studentList";
+    }
+
+    @GetMapping("/studentProfile")
+    public String studentProfile(Model model) {
+        Student student = studentService.getCurrentStudent().orElse(new Student());
+        model.addAttribute("student", student);
+        model.addAttribute("formAction", "/studentProfileSave");
+        model.addAttribute("selfEdit", true);
+        return "student-add";
+    }
+
+    @PostMapping("/studentProfileSave")
+    public String saveStudentProfile(Student student) {
+        studentService.updateCurrentStudent(student);
+        return "redirect:/projektList";
     }
 }

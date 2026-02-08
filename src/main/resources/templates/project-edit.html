@@ -10,7 +10,7 @@
     <div class="logo"><a th:href="@{/index}">Dziennik</a></div>
     <nav>
         <ul>
-            <li><a th:href="@{/studentList}">Student</a></li>
+            <li><a th:href="${isAdmin} ? '/studentList' : '/studentProfile'">Student</a></li>
             <li><a th:href="@{/zadanieList}">Zadanie</a></li>
             <li><a th:href="@{/projektList}">Projekt</a></li>
             <li><a href="/logout" class="btn-light">Wyloguj</a></li>
@@ -47,6 +47,9 @@
             <div style="margin-bottom: 30px;">
                 <label>Utworzony:</label>
                 <input type="text" th:value="${#temporals.format(projekt.dataCzasUtworzenia, 'yyyy-MM-dd HH:mm')}" readonly style="background:#f0f0f0;">
+                <p style="font-size: 12px; color: #666; margin-top: 6px;">
+                    Data i czas utworzenia rekordu w systemie (ustawiane automatycznie).
+                </p>
             </div>
 
             <div style="text-align: center;">
