@@ -8,7 +8,7 @@
 </head>
 <body>
 <header>
-    <div class="logo"><a th:href="@{/index}">Dziennik</a></div>
+    <div class="logo"><a th:href="${isAuthenticated} ? '/projektList' : '/index'">Dziennik</a></div>
     <nav>
         <ul>
             <li><a th:href="@{/register.html}" class="btn-light">Rejestracja</a></li>

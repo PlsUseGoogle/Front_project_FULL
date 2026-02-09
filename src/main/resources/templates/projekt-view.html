@@ -2,8 +2,8 @@
 <html lang="pl" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Lista Zadań</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <title>Projekt - Dziennik</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
 <header>
@@ -12,36 +12,61 @@
         <ul>
             <li sec:authorize="hasRole('ADMIN')"><a href="/studentList">Studenci</a></li>
             <li sec:authorize="hasRole('USER')"><a href="/studentProfile">Moje dane</a></li>
-            <li sec:authorize="isAuthenticated()"><a href="/zadanieList">Zadania</a></li>
-            <li sec:authorize="isAuthenticated()"><a href="/projektList">Projekty</a></li>
+            <li sec:authorize="isAuthenticated()"><a th:href="@{/zadanieList}">Zadania</a></li>
+            <li sec:authorize="isAuthenticated()"><a th:href="@{/projektList}">Projekty</a></li>
             <li sec:authorize="isAuthenticated()"><a href="/logout" class="btn-light">Wyloguj</a></li>
         </ul>
     </nav>
 </header>
 
 <section>
-    <h1>Lista Zadań</h1>
+    <h1>Projekt</h1>
+    <div class="form-container">
+        <p><strong>Id:</strong> <span th:text="${projekt.projektId}">1</span></p>
+        <p><strong>Nazwa:</strong> <span th:text="${projekt.nazwa}">Nazwa</span></p>
+        <p><strong>Utworzony:</strong>
+            <span th:text="${projekt.dataCzasUtworzenia != null ? #temporals.format(projekt.dataCzasUtworzenia, 'dd-MM-yyyy HH:mm') : '-'}">-</span>
+        </p>
+        <p><strong>Data oddania:</strong> <span th:text="${projekt.dataOddania != null ? #temporals.format(projekt.dataOddania, 'dd-MM-yyyy') : '-'}">-</span></p>
+    </div>
+
+    <div class="form-container">
+        <label for="projektOpis"><strong>Opis projektu</strong></label>
+        <textarea id="projektOpis" rows="5" readonly
+                  style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; background: #f9f9f9;"
+                  th:text="${projekt.opis}">Opis</textarea>
+    </div>
+
+    <h2>Zadania w projekcie</h2>
     <div class="project-actions" sec:authorize="hasRole('ADMIN')">
         <a href="/zadanieEdit" class="btn-green">Dodaj zadanie</a>
     </div>
 
-    <table class="comparison-table">
+    <p th:if="${zadania == null or #lists.isEmpty(zadania)}" class="subtitle">Brak zadań przypisanych do projektu.</p>
+
+    <table class="comparison-table" th:if="${zadania != null and !#lists.isEmpty(zadania)}">
         <thead>
         <tr>
             <th>
-                <a th:href="@{/zadanieList(page=0, size=${pageSize}, sort=${sortField == 'nazwa' and sortDir == 'asc' ? 'nazwa,desc' : 'nazwa,asc'})}">
+                <a th:href="@{/projektView(projektId=${projekt.projektId}, page=0, size=${pageSize}, sort=${sortField == 'nazwa' and sortDir == 'asc' ? 'nazwa,desc' : 'nazwa,asc'})}">
                     Nazwa
                     <span th:if="${sortField == 'nazwa'}" th:text="${sortDir == 'asc' ? ' ▲' : ' ▼'}"> ▲</span>
                 </a>
             </th>
             <th>Opis</th>
             <th>
-                <a th:href="@{/zadanieList(page=0, size=${pageSize}, sort=${sortField == 'kolejnosc' and sortDir == 'asc' ? 'kolejnosc,desc' : 'kolejnosc,asc'})}">
+                <a th:href="@{/projektView(projektId=${projekt.projektId}, page=0, size=${pageSize}, sort=${sortField == 'kolejnosc' and sortDir == 'asc' ? 'kolejnosc,desc' : 'kolejnosc,asc'})}">
                     Kolejność
                     <span th:if="${sortField == 'kolejnosc'}" th:text="${sortDir == 'asc' ? ' ▲' : ' ▼'}"> ▲</span>
                 </a>
             </th>
-            <th>Projekt</th> <th sec:authorize="hasRole('ADMIN')">Akcje</th>
+            <th>
+                <a th:href="@{/projektView(projektId=${projekt.projektId}, page=0, size=${pageSize}, sort=${sortField == 'dataCzasDodania' and sortDir == 'asc' ? 'dataCzasDodania,desc' : 'dataCzasDodania,asc'})}">
+                    Dodano
+                    <span th:if="${sortField == 'dataCzasDodania'}" th:text="${sortDir == 'asc' ? ' ▲' : ' ▼'}"> ▲</span>
+                </a>
+            </th>
+            <th sec:authorize="hasRole('ADMIN')">Akcje</th>
         </tr>
         </thead>
         <tbody>
@@ -49,15 +74,7 @@
             <td th:text="${zadanie.nazwa}" style="font-weight:bold;">Nazwa</td>
             <td th:text="${zadanie.opis}">Opis</td>
             <td th:text="${zadanie.kolejnosc}">1</td>
-
-            <td>
-                <span th:if="${zadanie.projekt != null}"
-                      th:text="${zadanie.projekt.nazwa != null ? zadanie.projekt.nazwa : 'ID: ' + zadanie.projekt.projektId}"
-                      style="display:inline-block; background:#f0f0f0; padding:2px 8px; border-radius:4px; font-size:13px;">
-                </span>
-                <span th:if="${zadanie.projekt == null}" style="color: #999;">Brak projektu</span>
-            </td>
-
+            <td th:text="${zadanie.dataCzasDodania != null ? #temporals.format(zadanie.dataCzasDodania, 'dd-MM-yyyy HH:mm') : '-'}">-</td>
             <td sec:authorize="hasRole('ADMIN')">
                 <div class="action-buttons">
                     <a th:href="@{/zadanieEdit(zadanieId=${zadanie.zadanieId})}" class="btn-green">Edytuj</a>
@@ -69,11 +86,12 @@
     </table>
 
     <div class="project-actions">
-        <form action="/zadanieList" method="get" style="display: flex; gap: 10px; align-items: center; justify-content: flex-end;">
+        <form action="/projektView" method="get" style="display: flex; gap: 10px; align-items: center; justify-content: flex-end;">
+            <input type="hidden" name="projektId" th:value="${projekt.projektId}">
             <input type="hidden" name="page" value="0">
             <input type="hidden" name="sort" th:value="${sortParam}">
-            <label for="zadaniePageSize">Na stronie:</label>
-            <select id="zadaniePageSize" name="size" onchange="this.form.submit()">
+            <label for="projektViewPageSize">Na stronie:</label>
+            <select id="projektViewPageSize" name="size" onchange="this.form.submit()">
                 <option value="2" th:selected="${pageSize == 2}">2</option>
                 <option value="3" th:selected="${pageSize == 3}">3</option>
                 <option value="5" th:selected="${pageSize == 5}">5</option>
@@ -88,11 +106,11 @@
 
     <div class="project-actions" th:if="${totalPages != null and totalPages > 1}">
         <a th:if="${currentPage > 0}"
-           th:href="@{/zadanieList(page=${currentPage - 1}, size=${pageSize}, sort=${sortParam})}"
+           th:href="@{/projektView(projektId=${projekt.projektId}, page=${currentPage - 1}, size=${pageSize}, sort=${sortParam})}"
            class="btn-light">Prev</a>
         <span th:text="${currentPage + 1} + ' / ' + ${totalPages}">1 / 1</span>
         <a th:if="${currentPage + 1 < totalPages}"
-           th:href="@{/zadanieList(page=${currentPage + 1}, size=${pageSize}, sort=${sortParam})}"
+           th:href="@{/projektView(projektId=${projekt.projektId}, page=${currentPage + 1}, size=${pageSize}, sort=${sortParam})}"
            class="btn-light">Next</a>
     </div>
 </section>

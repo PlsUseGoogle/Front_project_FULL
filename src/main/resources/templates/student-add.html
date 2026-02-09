@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<html lang="pl" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Dodaj Studenta</title>
@@ -7,21 +7,31 @@
 </head>
 <body>
 <header>
-    <div class="logo"><a href="/index">Dziennik</a></div>
+    <div class="logo"><a th:href="${isAuthenticated} ? '/projektList' : '/index'">Dziennik</a></div>
     <nav>
         <ul>
-            <li><a href="/studentList">Student</a></li>
-            <li><a href="/zadanieList">Zadanie</a></li>
-            <li><a href="/projektList">Projekt</a></li>
+            <li sec:authorize="hasRole('ADMIN')" th:if="${!selfEdit}">
+                <a href="/studentList">Studenci</a>
+            </li>
+            <li sec:authorize="hasRole('USER')">
+                <a href="/studentProfile">Moje dane</a>
+            </li>
+            <li sec:authorize="isAuthenticated()"><a href="/zadanieList">Zadania</a></li>
+            <li sec:authorize="isAuthenticated()"><a href="/projektList">Projekty</a></li>
         </ul>
     </nav>
 </header>
 
 <section>
-    <h1>Dodaj nowego studenta</h1>
+    <h1>
+        <span th:if="${selfEdit}">Edytuj swoje dane</span>
+        <span th:if="${!selfEdit and isAdmin and student.studentId != null}">Edytuj dane studenta</span>
+        <span th:if="${!selfEdit and (student.studentId == null)}">Dodaj nowego studenta</span>
+    </h1>
 
     <div class="form-container">
-        <form th:action="@{/studentSave}" th:object="${student}" method="post">
+        <form th:action="@{${formAction}}" th:object="${student}" method="post">
+            <input type="hidden" th:field="*{studentId}">
 
             <label>Imię:</label>
             <input type="text" th:field="*{imie}" placeholder="Jan" required>
@@ -33,7 +43,10 @@
             <input type="text" th:field="*{nrIndeksu}" placeholder="12345" required>
 
             <label>E-mail:</label>
-            <input type="email" th:field="*{email}" placeholder="student@pbs.edu.pl" required>
+            <input type="email" th:field="*{email}" placeholder="student@pbs.edu.pl" maxlength="254" required>
+            <p th:if="${selfEdit}" style="font-size: 12px; color: #666; margin-top: 6px;">
+                Zmiana e-maila wymaga ponownego logowania z nowym adresem.
+            </p>
 
             <label>Forma studiów:</label>
             <select th:field="*{stacjonarny}" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 15px;">
@@ -41,11 +54,27 @@
                 <option th:value="false">Niestacjonarne</option>
             </select>
 
-            <label>Hasło (Opcjonalne, domyślnie 123):</label>
-            <input type="text" th:field="*{password}" placeholder="Pozostaw puste dla domyślnego">
+            <div th:if="${!selfEdit}">
+                <label>Przypisz projekty (opcjonalnie):</label>
+                <select th:field="*{projektIds}" multiple="multiple"
+                        style="width: 100%; height: 150px; padding: 10px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 15px; background-color: white;">
+                    <option th:each="projekt : ${listaProjektow}"
+                            th:value="${projekt.projektId}"
+                            th:text="${projekt.nazwa}">
+                    </option>
+                </select>
+            </div>
+
+            <label th:text="${!selfEdit and student.studentId == null} ? 'Hasło (wymagane):' : 'Nowe hasło (opcjonalnie):'"></label>
+            <input type="password" th:field="*{password}" placeholder="Pozostaw puste jeśli bez zmian" autocomplete="new-password"
+                   th:attr="required=${!selfEdit and student.studentId == null}">
 
             <button type="submit" class="btn-green">Zapisz</button>
-            <a href="/studentList" class="btn-light">Anuluj</a>
+            <a th:href="${selfEdit} ? '/projektList' : '/studentList'" class="btn-light">Anuluj</a>
+            <a th:if="${!selfEdit and isAdmin and student.studentId != null}"
+               th:href="@{/studentDelete(studentId=${student.studentId})}"
+               class="btn-red-small" style="margin-left: 10px;"
+               onclick="return confirm('Usunięcie studenta wypnie go z wszystkich projektów. Kontynuować?')">Usuń</a>
         </form>
     </div>
 </section>
